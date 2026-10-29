@@ -107,6 +107,14 @@
             padding: 10px;
             background: rgba(0,0,0,0.02);
             border-radius: 10px;
+            transition: opacity 0.2s ease;
+        }
+
+        /* Стиль для пропущенных пар */
+        .lesson-item.skipped {
+            opacity: 0.45;
+            background: rgba(0,0,0,0.01);
+            border: 1px dashed var(--border-color);
         }
 
         .lesson-time {
@@ -147,6 +155,11 @@
         .tag-lk { background: #dbeafe; color: #1e40af; }
         .tag-pz { background: #fef3c7; color: #92400e; }
         .tag-lr { background: #dcfce7; color: #166534; }
+        
+        .tag-skipped {
+            background: #e4e4e7;
+            color: #52525b;
+        }
 
         .empty-state {
             text-align: center;
@@ -174,27 +187,26 @@
     <div id="schedule-container"></div>
 
     <script>
-        // Инициализация Telegram Web App
         const tg = window.Telegram.WebApp;
-        tg.expand(); // Разворачиваем окно на всю высоту
+        tg.expand();
 
         let currentWeek = 1;
 
-        // Демо-данные (позже подтянутся из вашего бота)
+        // Пример данных с поддержкой статуса пропуска (isSkipped: true/false)
         const mockSchedule = {
             1: [
                 {
                     day: "Четверг",
                     lessons: [
-                        { time: "15:30", type: "ЛК", title: "САСиПМС", detail: "112-3 к. Котухов А. В. [общая]" },
-                        { time: "19:00", type: "ПЗ", title: "ПОМС", detail: "404-1 к. Писарчик А. Ю. [общая]" }
+                        { time: "15:30", type: "ЛК", title: "САСиПМС", detail: "112-3 к. Котухов А. В. [общая]", isSkipped: false },
+                        { time: "19:00", type: "ПЗ", title: "ПОМС", detail: "404-1 к. Писарчик А. Ю. [общая]", isSkipped: true } // Пример пропущенной пары
                     ]
                 },
                 {
                     day: "Пятница",
                     lessons: [
-                        { time: "13:35", type: "ПЗ", title: "ФизК", detail: "[общая]" },
-                        { time: "15:30", type: "ЛК", title: "ТРПОМС", detail: "104-3 к. Медведев О. С. [общая]" }
+                        { time: "13:35", type: "ПЗ", title: "ФизК", detail: "[общая]", isSkipped: false },
+                        { time: "15:30", type: "ЛК", title: "ТРПОМС", detail: "104-3 к. Медведев О. С. [общая]", isSkipped: false }
                     ]
                 }
             ],
@@ -202,7 +214,7 @@
                 {
                     day: "Понедельник",
                     lessons: [
-                        { time: "08:00", type: "ЛР", title: "ПОМС", detail: "405-1 к. Писарчик А. Ю. [1п.]" }
+                        { time: "08:00", type: "ЛР", title: "ПОМС", detail: "405-1 к. Писарчик А. Ю. [1п.]", isSkipped: false }
                     ]
                 }
             ]
@@ -223,7 +235,7 @@
             if (days.length === 0) {
                 container.innerHTML = `
                     <div class="empty-state">
-                        🎉 На этой неделе нет пар или всё пропущено!
+                        🎉 На этой неделе нет пар!
                     </div>
                 `;
                 return;
@@ -234,12 +246,13 @@
                     <div class="day-header">📅 ${d.day}</div>
                     <div class="lesson-list">
                         ${d.lessons.map(l => `
-                            <div class="lesson-item">
+                            <div class="lesson-item ${l.isSkipped ? 'skipped' : ''}">
                                 <div class="lesson-time">${l.time}</div>
                                 <div class="lesson-info">
                                     <div class="lesson-title">
                                         ${l.title}
                                         <span class="tag tag-${l.type.toLowerCase()}">${l.type}</span>
+                                        ${l.isSkipped ? '<span class="tag tag-skipped">Пропуск</span>' : ''}
                                     </div>
                                     <div class="lesson-details">${l.detail}</div>
                                 </div>
@@ -250,7 +263,6 @@
             `).join('');
         }
 
-        // Первичный рендер
         renderSchedule();
     </script>
 </body>
