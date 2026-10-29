@@ -1,1 +1,257 @@
-<h1>Привет, это мое Mini App!</h1>
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>Расписание БГУИР</title>
+    <!-- Telegram Web App SDK -->
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <style>
+        :root {
+            --bg-color: var(--tg-theme-bg-color, #f4f4f5);
+            --card-bg: var(--tg-theme-secondary-bg-color, #ffffff);
+            --text-color: var(--tg-theme-text-color, #18181b);
+            --hint-color: var(--tg-theme-hint-color, #71717a);
+            --button-color: var(--tg-theme-button-color, #2563eb);
+            --button-text: var(--tg-theme-button-text-color, #ffffff);
+            --border-color: #e4e4e7;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            margin: 0;
+            padding: 16px;
+            box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        h1 {
+            font-size: 20px;
+            margin: 0 0 6px 0;
+            font-weight: 700;
+        }
+
+        p.subtitle {
+            font-size: 13px;
+            color: var(--hint-color);
+            margin: 0;
+        }
+
+        /* Переключатель недель */
+        .week-selector {
+            display: flex;
+            background: var(--card-bg);
+            padding: 4px;
+            border-radius: 12px;
+            gap: 4px;
+            margin-bottom: 20px;
+            border: 1px solid var(--border-color);
+        }
+
+        .week-btn {
+            flex: 1;
+            padding: 8px 0;
+            border: none;
+            background: transparent;
+            color: var(--text-color);
+            font-weight: 600;
+            font-size: 14px;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .week-btn.active {
+            background: var(--button-color);
+            color: var(--button-text);
+        }
+
+        /* Карточка дня */
+        .day-card {
+            background: var(--card-bg);
+            border-radius: 16px;
+            padding: 16px;
+            margin-bottom: 16px;
+            border: 1px solid var(--border-color);
+            box-shadow: 0 2px 8px rgba(0,0,0,0.03);
+        }
+
+        .day-header {
+            font-size: 16px;
+            font-weight: 700;
+            margin-bottom: 12px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            color: var(--button-color);
+        }
+
+        /* Список пар */
+        .lesson-list {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .lesson-item {
+            display: flex;
+            align-items: flex-start;
+            gap: 12px;
+            padding: 10px;
+            background: rgba(0,0,0,0.02);
+            border-radius: 10px;
+        }
+
+        .lesson-time {
+            font-size: 13px;
+            font-weight: 700;
+            font-family: monospace;
+            background: rgba(0,0,0,0.05);
+            padding: 4px 8px;
+            border-radius: 6px;
+            white-space: nowrap;
+        }
+
+        .lesson-info {
+            flex: 1;
+        }
+
+        .lesson-title {
+            font-size: 14px;
+            font-weight: 600;
+            margin-bottom: 2px;
+        }
+
+        .lesson-details {
+            font-size: 12px;
+            color: var(--hint-color);
+        }
+
+        .tag {
+            display: inline-block;
+            font-size: 10px;
+            font-weight: 700;
+            padding: 2px 6px;
+            border-radius: 4px;
+            margin-left: 6px;
+            text-transform: uppercase;
+        }
+
+        .tag-lk { background: #dbeafe; color: #1e40af; }
+        .tag-pz { background: #fef3c7; color: #92400e; }
+        .tag-lr { background: #dcfce7; color: #166534; }
+
+        .empty-state {
+            text-align: center;
+            padding: 40px 20px;
+            color: var(--hint-color);
+        }
+    </style>
+</head>
+<body>
+
+    <header>
+        <h1>🎓 Расписание БГУИР</h1>
+        <p class="subtitle">1-я подгруппа • Общие пары</p>
+    </header>
+
+    <!-- Выбор недели -->
+    <div class="week-selector">
+        <button class="week-btn active" onclick="selectWeek(1)">1 нед.</button>
+        <button class="week-btn" onclick="selectWeek(2)">2 нед.</button>
+        <button class="week-btn" onclick="selectWeek(3)">3 нед.</button>
+        <button class="week-btn" onclick="selectWeek(4)">4 нед.</button>
+    </div>
+
+    <!-- Контейнер для вывода пар -->
+    <div id="schedule-container"></div>
+
+    <script>
+        // Инициализация Telegram Web App
+        const tg = window.Telegram.WebApp;
+        tg.expand(); // Разворачиваем окно на всю высоту
+
+        let currentWeek = 1;
+
+        // Демо-данные (позже подтянутся из вашего бота)
+        const mockSchedule = {
+            1: [
+                {
+                    day: "Четверг",
+                    lessons: [
+                        { time: "15:30", type: "ЛК", title: "САСиПМС", detail: "112-3 к. Котухов А. В. [общая]" },
+                        { time: "19:00", type: "ПЗ", title: "ПОМС", detail: "404-1 к. Писарчик А. Ю. [общая]" }
+                    ]
+                },
+                {
+                    day: "Пятница",
+                    lessons: [
+                        { time: "13:35", type: "ПЗ", title: "ФизК", detail: "[общая]" },
+                        { time: "15:30", type: "ЛК", title: "ТРПОМС", detail: "104-3 к. Медведев О. С. [общая]" }
+                    ]
+                }
+            ],
+            2: [
+                {
+                    day: "Понедельник",
+                    lessons: [
+                        { time: "08:00", type: "ЛР", title: "ПОМС", detail: "405-1 к. Писарчик А. Ю. [1п.]" }
+                    ]
+                }
+            ]
+        };
+
+        function selectWeek(weekNum) {
+            currentWeek = weekNum;
+            document.querySelectorAll('.week-btn').forEach((btn, idx) => {
+                btn.classList.toggle('active', idx + 1 === weekNum);
+            });
+            renderSchedule();
+        }
+
+        function renderSchedule() {
+            const container = document.getElementById('schedule-container');
+            const days = mockSchedule[currentWeek] || [];
+
+            if (days.length === 0) {
+                container.innerHTML = `
+                    <div class="empty-state">
+                        🎉 На этой неделе нет пар или всё пропущено!
+                    </div>
+                `;
+                return;
+            }
+
+            container.innerHTML = days.map(d => `
+                <div class="day-card">
+                    <div class="day-header">📅 ${d.day}</div>
+                    <div class="lesson-list">
+                        ${d.lessons.map(l => `
+                            <div class="lesson-item">
+                                <div class="lesson-time">${l.time}</div>
+                                <div class="lesson-info">
+                                    <div class="lesson-title">
+                                        ${l.title}
+                                        <span class="tag tag-${l.type.toLowerCase()}">${l.type}</span>
+                                    </div>
+                                    <div class="lesson-details">${l.detail}</div>
+                                </div>
+                            </div>
+                        `).join('')}
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        // Первичный рендер
+        renderSchedule();
+    </script>
+</body>
+</html>
