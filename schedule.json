@@ -1,0 +1,776 @@
+{
+  "1": [
+    {
+      "day": "Понедельник",
+      "lessons": [
+        {
+          "time": "12:00",
+          "type": "ПЗ",
+          "title": "ТОПЭМС",
+          "room": "37-1 к. Боровиков С. М. (доцент)",
+          "teacher": "",
+          "isSkipped": false
+        },
+        {
+          "time": "13:35",
+          "type": "ЛР",
+          "title": "МиТСИПМС",
+          "room": "37-1 к. Боровиков С. М. (доцент)",
+          "teacher": "",
+          "isSkipped": false
+        },
+        {
+          "time": "15:30",
+          "type": "ЛР",
+          "title": "п. СиФОВМ",
+          "room": "309-1 к. Пригодич В. Н.",
+          "teacher": "",
+          "isSkipped": false
+        },
+        {
+          "time": "15:30",
+          "type": "ЛР",
+          "title": "п. САСиПМС",
+          "room": "404-1 к. Котухов А. В.",
+          "teacher": "",
+          "isSkipped": false
+        },
+        {
+          "time": "17:05",
+          "type": "ЛР",
+          "title": "п. САСиПМС",
+          "room": "404-1 к. Котухов А. В.",
+          "teacher": "",
+          "isSkipped": false
+        },
+        {
+          "time": "17:05",
+          "type": "ЛР",
+          "title": "п. СиФОВМ",
+          "room": "309-1 к. Пригодич В. Н.",
+          "teacher": "",
+          "isSkipped": false
+        }
+      ]
+    },
+    {
+      "day": "Вторник",
+      "lessons": [
+        {
+          "time": "12:00",
+          "type": "ЛР",
+          "title": "п. ОС",
+          "room": "404-1 к. Соколович М. Г.",
+          "teacher": "",
+          "isSkipped": false
+        },
+        {
+          "time": "13:35",
+          "type": "ЛР",
+          "title": "ОС",
+          "room": "404-1 к. Соколович М. Г.",
+          "teacher": "",
+          "isSkipped": false
+        },
+        {
+          "time": "15:30",
+          "type": "ЛК",
+          "title": "МиТСИПМС",
+          "room": "104-3 к. Боровиков С. М. (доцент)",
+          "teacher": "",
+          "isSkipped": false
+        },
+        {
+          "time": "17:05",
+          "type": "ЛК",
+          "title": "МСиСвИТ",
+          "room": "104-3 к. Волынец А. С.",
+          "teacher": "",
+          "isSkipped": false
+        }
+      ]
+    },
+    {
+      "day": "Среда",
+      "lessons": [
+        {
+          "time": "10:05",
+          "type": "ПЗ",
+          "title": "К.Ч.",
+          "room": "405-1 к. Пискун Г. А. (доцент)",
+          "teacher": "",
+          "isSkipped": false
+        },
+        {
+          "time": "12:00",
+          "type": "ПЗ",
+          "title": "МСиСвИТ",
+          "room": "503-3 к. Доронина А. В.",
+          "teacher": "",
+          "isSkipped": false
+        },
+        {
+          "time": "13:35",
+          "type": "ЛР",
+          "title": "САСиПМС",
+          "room": "415-1 к. Котухов А. В.",
+          "teacher": "",
+          "isSkipped": false
+        },
+        {
+          "time": "15:30",
+          "type": "ПЗ",
+          "title": "ФизК",
+          "room": "",
+          "teacher": "",
+          "isSkipped": false
+        },
+        {
+          "time": "17:05",
+          "type": "ЛК",
+          "title": "ТОПЭМС",
+          "room": "112-3 к. Боровиков С. М. (доцент)",
+          "teacher": "",
+          "isSkipped": false
+        }
+      ]
+    },
+    {
+      "day": "Четверг",
+      "lessons": [
+        {
+          "time": "15:30",
+          "type": "ЛК",
+          "title": "САСиПМС",
+          "room": "112-3 к. Котухов А. В.",
+          "teacher": "",
+          "isSkipped": false
+        },
+        {
+          "time": "17:05",
+          "type": "ЛК",
+          "title": "ОС",
+          "room": "112-3 к. Писарчик А. Ю.",
+          "teacher": "",
+          "isSkipped": false
+        },
+        {
+          "time": "19:00",
+          "type": "ПЗ",
+          "title": "ПОМС",
+          "room": "404-1 к. Писарчик А. Ю.",
+          "teacher": "",
+          "isSkipped": false
+        }
+      ]
+    },
+    {
+      "day": "Пятница",
+      "lessons": [
+        {
+          "time": "13:35",
+          "type": "ПЗ",
+          "title": "ФизК",
+          "room": "",
+          "teacher": "",
+          "isSkipped": false
+        },
+        {
+          "time": "15:30",
+          "type": "ЛК",
+          "title": "ТРПОМС",
+          "room": "104-3 к. Медведев О. С.",
+          "teacher": "",
+          "isSkipped": false
+        },
+        {
+          "time": "17:05",
+          "type": "ЛК",
+          "title": "ПОМС",
+          "room": "104-3 к. Писарчик А. Ю.",
+          "teacher": "",
+          "isSkipped": false
+        }
+      ]
+    }
+  ],
+  "2": [
+    {
+      "day": "Понедельник",
+      "lessons": [
+        {
+          "time": "12:00",
+          "type": "ЛР",
+          "title": "п. МиТСИПМС",
+          "room": "37-1 к. Боровиков С. М. (доцент)",
+          "teacher": "",
+          "isSkipped": false
+        },
+        {
+          "time": "12:00",
+          "type": "ЛР",
+          "title": "п. ТРПОМС",
+          "room": "611-2 к. Медведев О. С.",
+          "teacher": "",
+          "isSkipped": false
+        },
+        {
+          "time": "13:35",
+          "type": "ЛР",
+          "title": "п. ТРПОМС",
+          "room": "611-2 к. Медведев О. С.",
+          "teacher": "",
+          "isSkipped": false
+        },
+        {
+          "time": "13:35",
+          "type": "ЛР",
+          "title": "п. ТОПЭМС",
+          "room": "37-1 к. Боровиков С. М. (доцент)",
+          "teacher": "",
+          "isSkipped": false
+        },
+        {
+          "time": "15:30",
+          "type": "ПЗ",
+          "title": "Инф. час",
+          "room": "408-1 к. Пискун Г. А. (доцент)",
+          "teacher": "",
+          "isSkipped": false
+        }
+      ]
+    },
+    {
+      "day": "Вторник",
+      "lessons": [
+        {
+          "time": "15:30",
+          "type": "ЛК",
+          "title": "МиТСИПМС",
+          "room": "104-3 к. Боровиков С. М. (доцент)",
+          "teacher": "",
+          "isSkipped": false
+        },
+        {
+          "time": "17:05",
+          "type": "ЛК",
+          "title": "МСиСвИТ",
+          "room": "104-3 к. Волынец А. С.",
+          "teacher": "",
+          "isSkipped": false
+        }
+      ]
+    },
+    {
+      "day": "Среда",
+      "lessons": [
+        {
+          "time": "13:35",
+          "type": "ПЗ",
+          "title": "МСиСвИТ",
+          "room": "503-3 к. Доронина А. В.",
+          "teacher": "",
+          "isSkipped": false
+        },
+        {
+          "time": "15:30",
+          "type": "ПЗ",
+          "title": "ФизК",
+          "room": "",
+          "teacher": "",
+          "isSkipped": false
+        },
+        {
+          "time": "17:05",
+          "type": "ЛК",
+          "title": "ТОПЭМС",
+          "room": "112-3 к. Боровиков С. М. (доцент)",
+          "teacher": "",
+          "isSkipped": false
+        },
+        {
+          "time": "19:00",
+          "type": "ЛК",
+          "title": "САСиПМС",
+          "room": "112-3 к. Котухов А. В.",
+          "teacher": "",
+          "isSkipped": false
+        }
+      ]
+    },
+    {
+      "day": "Четверг",
+      "lessons": [
+        {
+          "time": "13:35",
+          "type": "ЛР",
+          "title": "п. ПОМС",
+          "room": "405-1 к. Писарчик А. Ю.  05.11 в а.37-1",
+          "teacher": "",
+          "isSkipped": false
+        },
+        {
+          "time": "15:30",
+          "type": "ЛК",
+          "title": "САСиПМС",
+          "room": "112-3 к. Котухов А. В.",
+          "teacher": "",
+          "isSkipped": false
+        },
+        {
+          "time": "17:05",
+          "type": "ЛК",
+          "title": "МиТСИПМС",
+          "room": "112-3 к. Боровиков С. М. (доцент)",
+          "teacher": "",
+          "isSkipped": false
+        }
+      ]
+    },
+    {
+      "day": "Пятница",
+      "lessons": [
+        {
+          "time": "12:00",
+          "type": "ЛР",
+          "title": "СиФОВМ",
+          "room": "309-1 к. Пригодич В. Н.",
+          "teacher": "",
+          "isSkipped": false
+        },
+        {
+          "time": "13:35",
+          "type": "ПЗ",
+          "title": "ФизК",
+          "room": "",
+          "teacher": "",
+          "isSkipped": false
+        },
+        {
+          "time": "15:30",
+          "type": "ЛК",
+          "title": "ТРПОМС",
+          "room": "104-3 к. Медведев О. С.",
+          "teacher": "",
+          "isSkipped": false
+        },
+        {
+          "time": "17:05",
+          "type": "ЛК",
+          "title": "ПОМС",
+          "room": "104-3 к. Писарчик А. Ю.",
+          "teacher": "",
+          "isSkipped": false
+        }
+      ]
+    },
+    {
+      "day": "Суббота",
+      "lessons": [
+        {
+          "time": "12:00",
+          "type": "ЛК",
+          "title": "СиФОВМ",
+          "room": "514-5 к. Воронов А. А. (доцент)",
+          "teacher": "",
+          "isSkipped": false
+        },
+        {
+          "time": "13:35",
+          "type": "ЛК",
+          "title": "СиФОВМ",
+          "room": "514-5 к. Воронов А. А. (доцент)",
+          "teacher": "",
+          "isSkipped": false
+        }
+      ]
+    }
+  ],
+  "3": [
+    {
+      "day": "Понедельник",
+      "lessons": [
+        {
+          "time": "13:25",
+          "type": "ПЗ",
+          "title": "ТОПЭМС",
+          "room": "37-1 к. Боровиков С. М. (доцент)",
+          "teacher": "",
+          "isSkipped": false
+        },
+        {
+          "time": "15:00",
+          "type": "ПЗ",
+          "title": "МиТСИПМС",
+          "room": "37-1 к. Боровиков С. М. (доцент)",
+          "teacher": "",
+          "isSkipped": false
+        },
+        {
+          "time": "16:55",
+          "type": "ЛР",
+          "title": "п. СиФОВМ",
+          "room": "309-1 к. Пригодич В. Н.",
+          "teacher": "",
+          "isSkipped": false
+        },
+        {
+          "time": "16:55",
+          "type": "ЛР",
+          "title": "п. САСиПМС",
+          "room": "404-1 к. Котухов А. В.",
+          "teacher": "",
+          "isSkipped": false
+        },
+        {
+          "time": "18:30",
+          "type": "ЛР",
+          "title": "п. САСиПМС",
+          "room": "404-1 к. Котухов А. В.",
+          "teacher": "",
+          "isSkipped": false
+        },
+        {
+          "time": "18:30",
+          "type": "ЛР",
+          "title": "п. СиФОВМ",
+          "room": "309-1 к. Пригодич В. Н.",
+          "teacher": "",
+          "isSkipped": false
+        }
+      ]
+    },
+    {
+      "day": "Вторник",
+      "lessons": [
+        {
+          "time": "13:25",
+          "type": "ЛР",
+          "title": "п. ОС",
+          "room": "404-1 к. Соколович М. Г.",
+          "teacher": "",
+          "isSkipped": false
+        },
+        {
+          "time": "15:00",
+          "type": "ЛР",
+          "title": "ТОПЭМС",
+          "room": "37-1 к. Боровиков С. М. (доцент)",
+          "teacher": "",
+          "isSkipped": false
+        },
+        {
+          "time": "16:55",
+          "type": "ЛК",
+          "title": "МиТСИПМС",
+          "room": "104-3 к. Боровиков С. М. (доцент)",
+          "teacher": "",
+          "isSkipped": false
+        },
+        {
+          "time": "18:30",
+          "type": "ЛК",
+          "title": "МСиСвИТ",
+          "room": "104-3 к. Волынец А. С.",
+          "teacher": "",
+          "isSkipped": false
+        }
+      ]
+    },
+    {
+      "day": "Среда",
+      "lessons": [
+        {
+          "time": "11:30",
+          "type": "ПЗ",
+          "title": "Инф. час",
+          "room": "405-1 к. Пискун Г. А. (доцент)  11.11 в ауд.413-1",
+          "teacher": "",
+          "isSkipped": false
+        },
+        {
+          "time": "13:25",
+          "type": "ПЗ",
+          "title": "МСиСвИТ",
+          "room": "503-3 к. Доронина А. В.",
+          "teacher": "",
+          "isSkipped": false
+        },
+        {
+          "time": "15:00",
+          "type": "ЛР",
+          "title": "САСиПМС",
+          "room": "415-1 к. Котухов А. В.",
+          "teacher": "",
+          "isSkipped": false
+        },
+        {
+          "time": "16:55",
+          "type": "ПЗ",
+          "title": "ФизК",
+          "room": "",
+          "teacher": "",
+          "isSkipped": false
+        },
+        {
+          "time": "18:30",
+          "type": "ЛК",
+          "title": "ТОПЭМС",
+          "room": "112-3 к. Боровиков С. М. (доцент)",
+          "teacher": "",
+          "isSkipped": false
+        }
+      ]
+    },
+    {
+      "day": "Четверг",
+      "lessons": [
+        {
+          "time": "16:55",
+          "type": "ЛК",
+          "title": "САСиПМС",
+          "room": "112-3 к. Котухов А. В.",
+          "teacher": "",
+          "isSkipped": false
+        },
+        {
+          "time": "18:30",
+          "type": "ЛК",
+          "title": "ОС",
+          "room": "112-3 к. Писарчик А. Ю.",
+          "teacher": "",
+          "isSkipped": false
+        },
+        {
+          "time": "20:25",
+          "type": "ЛР",
+          "title": "ПОМС",
+          "room": "404-1 к. Писарчик А. Ю.",
+          "teacher": "",
+          "isSkipped": false
+        }
+      ]
+    },
+    {
+      "day": "Пятница",
+      "lessons": [
+        {
+          "time": "15:00",
+          "type": "ПЗ",
+          "title": "ФизК",
+          "room": "",
+          "teacher": "",
+          "isSkipped": false
+        },
+        {
+          "time": "16:55",
+          "type": "ЛК",
+          "title": "ТРПОМС",
+          "room": "104-3 к. Медведев О. С.",
+          "teacher": "",
+          "isSkipped": false
+        },
+        {
+          "time": "18:30",
+          "type": "ЛК",
+          "title": "ПОМС",
+          "room": "104-3 к. Писарчик А. Ю.",
+          "teacher": "",
+          "isSkipped": false
+        },
+        {
+          "time": "20:25",
+          "type": "ЛК",
+          "title": "ОС",
+          "room": "104-3 к. Писарчик А. Ю.",
+          "teacher": "",
+          "isSkipped": false
+        }
+      ]
+    }
+  ],
+  "4": [
+    {
+      "day": "Понедельник",
+      "lessons": [
+        {
+          "time": "13:25",
+          "type": "ЛР",
+          "title": "п. ТРПОМС",
+          "room": "611-2 к. Медведев О. С.",
+          "teacher": "",
+          "isSkipped": false
+        },
+        {
+          "time": "13:25",
+          "type": "ЛР",
+          "title": "п. МиТСИПМС",
+          "room": "37-1 к. Боровиков С. М. (доцент)",
+          "teacher": "",
+          "isSkipped": false
+        },
+        {
+          "time": "15:00",
+          "type": "ЛР",
+          "title": "п. ТОПЭМС",
+          "room": "37-1 к. Боровиков С. М. (доцент)",
+          "teacher": "",
+          "isSkipped": false
+        },
+        {
+          "time": "15:00",
+          "type": "ЛР",
+          "title": "п. ТРПОМС",
+          "room": "611-2 к. Медведев О. С.",
+          "teacher": "",
+          "isSkipped": false
+        },
+        {
+          "time": "16:55",
+          "type": "ПЗ",
+          "title": "Инф. час",
+          "room": "408-1 к. Пискун Г. А. (доцент)",
+          "teacher": "",
+          "isSkipped": false
+        }
+      ]
+    },
+    {
+      "day": "Вторник",
+      "lessons": [
+        {
+          "time": "16:55",
+          "type": "ЛК",
+          "title": "МиТСИПМС",
+          "room": "104-3 к. Боровиков С. М. (доцент)",
+          "teacher": "",
+          "isSkipped": false
+        },
+        {
+          "time": "18:30",
+          "type": "ЛК",
+          "title": "МСиСвИТ",
+          "room": "104-3 к. Волынец А. С.",
+          "teacher": "",
+          "isSkipped": false
+        }
+      ]
+    },
+    {
+      "day": "Среда",
+      "lessons": [
+        {
+          "time": "16:55",
+          "type": "ПЗ",
+          "title": "ФизК",
+          "room": "",
+          "teacher": "",
+          "isSkipped": false
+        },
+        {
+          "time": "18:30",
+          "type": "ЛК",
+          "title": "ТОПЭМС",
+          "room": "112-3 к. Боровиков С. М. (доцент)",
+          "teacher": "",
+          "isSkipped": false
+        },
+        {
+          "time": "20:25",
+          "type": "ЛК",
+          "title": "САСиПМС",
+          "room": "112-3 к. Котухов А. В.",
+          "teacher": "",
+          "isSkipped": false
+        }
+      ]
+    },
+    {
+      "day": "Четверг",
+      "lessons": [
+        {
+          "time": "15:00",
+          "type": "ЛР",
+          "title": "п. ПОМС",
+          "room": "405-1 к. Писарчик А. Ю.",
+          "teacher": "",
+          "isSkipped": false
+        },
+        {
+          "time": "16:55",
+          "type": "ЛК",
+          "title": "САСиПМС",
+          "room": "112-3 к. Котухов А. В.",
+          "teacher": "",
+          "isSkipped": false
+        },
+        {
+          "time": "18:30",
+          "type": "ЛК",
+          "title": "ТОПЭМС",
+          "room": "112-3 к. Боровиков С. М. (доцент)",
+          "teacher": "",
+          "isSkipped": false
+        }
+      ]
+    },
+    {
+      "day": "Пятница",
+      "lessons": [
+        {
+          "time": "13:25",
+          "type": "ЛР",
+          "title": "ТРПОМС",
+          "room": "601-2 к. Медведев О. С.",
+          "teacher": "",
+          "isSkipped": false
+        },
+        {
+          "time": "15:00",
+          "type": "ПЗ",
+          "title": "ФизК",
+          "room": "",
+          "teacher": "",
+          "isSkipped": false
+        },
+        {
+          "time": "16:55",
+          "type": "ЛК",
+          "title": "ТРПОМС",
+          "room": "104-3 к. Медведев О. С.",
+          "teacher": "",
+          "isSkipped": false
+        },
+        {
+          "time": "18:30",
+          "type": "ЛК",
+          "title": "ПОМС",
+          "room": "104-3 к. Писарчик А. Ю.",
+          "teacher": "",
+          "isSkipped": false
+        }
+      ]
+    },
+    {
+      "day": "Суббота",
+      "lessons": [
+        {
+          "time": "13:25",
+          "type": "ЛК",
+          "title": "СиФОВМ",
+          "room": "514-5 к. Воронов А. А. (доцент)",
+          "teacher": "",
+          "isSkipped": false
+        },
+        {
+          "time": "15:00",
+          "type": "ЛК",
+          "title": "СиФОВМ",
+          "room": "514-5 к. Воронов А. А. (доцент)",
+          "teacher": "",
+          "isSkipped": false
+        }
+      ]
+    }
+  ]
+}
