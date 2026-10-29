@@ -4,8 +4,8 @@ from datetime import datetime, timedelta
 import urllib.request
 import urllib.parse
 
-BOT_TOKEN = os.getenv("BOT_TOKEN")
-MY_TELEGRAM_ID = os.getenv("MY_TELEGRAM_ID")
+BOT_TOKEN = os.getenv("9247475179:AAEd-8aH42Cl1HxaA_cF7nEaoTBn9OaVWJI")
+MY_TELEGRAM_ID = os.getenv("886620460")
 SEMESTER_START = datetime(2026, 10, 26)
 DAY_NAMES_MAP = {0: "Понедельник", 1: "Вторник", 2: "Среда", 3: "Четверг", 4: "Пятница", 5: "Суббота"}
 
