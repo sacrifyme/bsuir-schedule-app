@@ -523,7 +523,7 @@
                 `;
             });
 
-        // Сбор уникальных предметов по категориям
+// Сбор уникальных предметов по категориям (с защитой от разного регистра)
         function extractCategorizedSubjects() {
             const seen = { LK: new Set(), PZ: new Set(), LR: new Set() };
             categorizedSubjects = { LK: [], PZ: [], LR: [] };
@@ -532,12 +532,16 @@
                 if (!scheduleData[w]) continue;
                 scheduleData[w].forEach(d => {
                     d.lessons.forEach(l => {
-                        const typeKey = l.type.toUpperCase();
-                        if (categorizedSubjects[typeKey] !== undefined) {
-                            if (!seen[typeKey].has(l.title)) {
-                                seen[typeKey].add(l.title);
-                                categorizedSubjects[typeKey].push(l.title);
-                            }
+                        const rawType = (l.type || '').toUpperCase();
+                        let targetKey = '';
+                        
+                        if (rawType.includes('ЛК')) targetKey = 'LK';
+                        else if (rawType.includes('ПЗ')) targetKey = 'PZ';
+                        else if (rawType.includes('ЛР')) targetKey = 'LR';
+
+                        if (targetKey && !seen[targetKey].has(l.title)) {
+                            seen[targetKey].add(l.title);
+                            categorizedSubjects[targetKey].push(l.title);
                         }
                     });
                 });
