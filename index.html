@@ -352,57 +352,32 @@
             color: var(--button-text);
         }
 
-        /* Категории пропусков в настройках */
-        .skip-categories-container {
-            display: flex;
-            flex-direction: column;
-            gap: 14px;
-            max-height: 300px;
-            overflow-y: auto;
-            padding-right: 4px;
+        /* Выпадающие списки (селекты) для категорий */
+        .select-group {
+            margin-bottom: 12px;
         }
 
-        .skip-category-group {
-            background: rgba(0, 0, 0, 0.15);
+        .select-group label {
+            font-size: 11px;
+            margin-bottom: 4px;
+            color: var(--text-color);
+        }
+
+        .settings-select {
+            width: 100%;
+            background: rgba(0, 0, 0, 0.25);
             border: 1px solid var(--border-color);
-            border-radius: 14px;
+            color: var(--text-color);
             padding: 10px 12px;
-        }
-
-        .skip-category-title {
-            font-size: 13px;
-            font-weight: 800;
-            margin-bottom: 8px;
-            display: flex;
-            align-items: center;
-            gap: 6px;
-        }
-
-        .skip-category-title.lk { color: var(--lk-color); }
-        .skip-category-title.pz { color: var(--pz-color); }
-        .skip-category-title.lr { color: var(--lr-color); }
-
-        .skip-items-list {
-            display: flex;
-            flex-direction: column;
-            gap: 6px;
-        }
-
-        .skip-item {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            background: rgba(255, 255, 255, 0.03);
-            padding: 8px 10px;
-            border-radius: 10px;
-            border: 1px solid var(--border-color);
-            font-size: 13px;
-        }
-
-        .skip-item input[type="checkbox"] {
-            width: 18px; height: 18px;
-            accent-color: var(--button-color);
+            border-radius: 12px;
+            font-size: 14px;
+            outline: none;
             cursor: pointer;
+        }
+
+        .settings-select option {
+            background: var(--card-bg);
+            color: var(--text-color);
         }
 
         .save-settings-btn {
@@ -474,9 +449,30 @@
             </div>
 
             <div class="settings-section">
-                <label>Пропускаемые предметы по категориям</label>
-                <div class="skip-categories-container" id="skip-categories-container">
-                    <!-- Заполняется динамически по категориям -->
+                <label>Выбор пропускаемых предметов по категориям</label>
+                
+                <!-- Лекции -->
+                <div class="select-group">
+                    <label>📖 Лекции (ЛК)</label>
+                    <select class="settings-select" id="select-lk" onchange="handleCategorySelect('LK', this.value)">
+                        <option value="">Не пропускать</option>
+                    </select>
+                </div>
+
+                <!-- Практические -->
+                <div class="select-group">
+                    <label>📝 Практические (ПЗ)</label>
+                    <select class="settings-select" id="select-pz" onchange="handleCategorySelect('PZ', this.value)">
+                        <option value="">Не пропускать</option>
+                    </select>
+                </div>
+
+                <!-- Лабораторные -->
+                <div class="select-group">
+                    <label>💻 Лабораторные (ЛР)</label>
+                    <select class="settings-select" id="select-lr" onchange="handleCategorySelect('LR', this.value)">
+                        <option value="">Не пропускать</option>
+                    </select>
                 </div>
             </div>
 
@@ -527,7 +523,7 @@
                 `;
             });
 
-        // Сбор уникальных предметов и распределение по категориям (ЛК, ПЗ, ЛР)
+        // Сбор уникальных предметов по категориям
         function extractCategorizedSubjects() {
             const seen = { LK: new Set(), PZ: new Set(), LR: new Set() };
             categorizedSubjects = { LK: [], PZ: [], LR: [] };
@@ -547,52 +543,47 @@
                 });
             }
 
-            // Сортируем предметы по алфавиту внутри каждой категории
             Object.keys(categorizedSubjects).forEach(k => categorizedSubjects[k].sort());
-            renderSkipCategories();
+            populateSelects();
         }
 
-        function renderSkipCategories() {
-            const container = document.getElementById('skip-categories-container');
-            const catMeta = [
-                { key: 'LK', label: '📖 Лекции (ЛК)', class: 'lk' },
-                { key: 'PZ', label: '📝 Практические (ПЗ)', class: 'pz' },
-                { key: 'LR', label: '💻 Лабораторные (ЛР)', class: 'lr' }
-            ];
+        // Заполняем выпадающие списки в модалке и выставляем текущие значения
+        function populateSelects() {
+            const catMap = { LK: 'select-lk', PZ: 'select-pz', LR: 'select-lr' };
 
-            let html = '';
-            catMeta.forEach(cat => {
-                const subjects = categorizedSubjects[cat.key];
-                if (subjects.length === 0) return; // Пропускаем пустые категории
+            Object.keys(catMap).forEach(cat => {
+                const selectEl = document.getElementById(catMap[cat]);
+                const subjects = categorizedSubjects[cat];
 
-                html += `
-                    <div class="skip-category-group">
-                        <div class="skip-category-title ${cat.class}">${cat.label}</div>
-                        <div class="skip-items-list">
-                            ${subjects.map(title => {
-                                const subjectKey = `${title} (${cat.key})`;
-                                const isChecked = skippedSubjects.has(subjectKey);
-                                return `
-                                    <div class="skip-item">
-                                        <span>${title}</span>
-                                        <input type="checkbox" ${isChecked ? 'checked' : ''} onchange="toggleSubjectSkip('${subjectKey}')">
-                                    </div>
-                                `;
-                            }).join('')}
-                        </div>
-                    </div>
-                `;
+                let optionsHtml = '<option value="">Не пропускать</option>';
+                subjects.forEach(title => {
+                    optionsHtml += `<option value="${title}">${title}</option>`;
+                });
+                selectEl.innerHTML = optionsHtml;
+
+                // Ищем, какой предмет из этой категории сейчас в пропущенных
+                let selectedVal = "";
+                subjects.forEach(title => {
+                    if (skippedSubjects.has(`${title} (${cat})`)) {
+                        selectedVal = title;
+                    }
+                });
+                selectEl.value = selectedVal;
+            });
+        }
+
+        // Обработка выбора предмета в селекте категории
+        function handleCategorySelect(cat, title) {
+            // Сначала удаляем из пропущенных все предметы этой категории, чтобы заменить новым выбором
+            categorizedSubjects[cat].forEach(t => {
+                skippedSubjects.delete(`${t} (${cat})`);
             });
 
-            container.innerHTML = html || `<div style="font-size:12px; color:var(--hint-color); text-align:center;">Нет предметов</div>`;
-        }
-
-        function toggleSubjectSkip(subjectKey) {
-            if (skippedSubjects.has(subjectKey)) {
-                skippedSubjects.delete(subjectKey);
-            } else {
-                skippedSubjects.add(subjectKey);
+            // Если выбрали конкретный предмет — добавляем его в пропуски
+            if (title !== "") {
+                skippedSubjects.add(`${title} (${cat})`);
             }
+
             localStorage.setItem('skipped_subjects', JSON.stringify(Array.from(skippedSubjects)));
             renderSchedule();
             updateHeaderInfo();
