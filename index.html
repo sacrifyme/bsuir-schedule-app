@@ -34,11 +34,12 @@
             background-color: var(--bg-color);
             color: var(--text-color);
             margin: 0;
-            padding: 12px 16px 24px 16px;
+            padding: 12px 16px 32px 16px;
             font-size: 15px;
             line-height: 1.4;
         }
 
+        /* Шапка */
         header {
             display: flex;
             align-items: center;
@@ -48,7 +49,7 @@
         }
 
         .header-title h1 {
-            font-size: 22px;
+            font-size: 20px;
             font-weight: 800;
             margin: 0;
             background: linear-gradient(135deg, #60a5fa 0%, #a855f7 100%);
@@ -57,96 +58,50 @@
         }
 
         .header-title p {
-            font-size: 12px;
+            font-size: 11px;
             color: var(--hint-color);
             margin: 2px 0 0 0;
-            font-weight: 500;
         }
 
-        .subgroup-badge {
-            background: rgba(59, 130, 246, 0.12);
-            color: var(--button-color);
-            font-size: 11px;
-            font-weight: 700;
-            padding: 6px 10px;
-            border-radius: 20px;
-            border: 1px solid rgba(59, 130, 246, 0.25);
-        }
-
-        .mode-switch {
-            display: flex;
-            background: rgba(0, 0, 0, 0.2);
-            padding: 4px;
-            border-radius: 14px;
-            gap: 4px;
-            margin-bottom: 16px;
-            border: 1px solid var(--border-color);
-            backdrop-filter: blur(10px);
-        }
-
-        .mode-btn {
-            flex: 1;
-            padding: 8px 0;
-            border: none;
-            background: transparent;
-            color: var(--hint-color);
-            font-weight: 600;
-            font-size: 13px;
-            border-radius: 10px;
-            cursor: pointer;
-            transition: all 0.25s ease;
-        }
-
-        .mode-btn.active {
+        /* Кнопка настроек в шапке */
+        .settings-btn {
             background: var(--card-bg);
+            border: 1px solid var(--border-color);
             color: var(--text-color);
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-        }
-
-        .week-selector {
-            display: flex;
-            gap: 8px;
-            margin-bottom: 20px;
-        }
-
-        .week-chip {
-            flex: 1;
-            padding: 10px 0;
-            border: 1px solid var(--border-color);
-            background: var(--card-bg);
-            color: var(--hint-color);
-            font-weight: 700;
-            font-size: 12px;
+            padding: 8px 12px;
             border-radius: 12px;
+            font-size: 13px;
+            font-weight: 600;
             cursor: pointer;
-            text-align: center;
+            display: flex;
+            align-items: center;
+            gap: 6px;
             transition: all 0.2s ease;
         }
 
-        .week-chip.active {
-            background: var(--button-color);
-            color: var(--button-text);
-            border-color: var(--button-color);
-            box-shadow: 0 4px 14px rgba(59, 130, 246, 0.35);
+        .settings-btn:active {
+            transform: scale(0.95);
         }
 
-        .week-banner {
-            font-size: 15px;
-            font-weight: 800;
-            margin: 24px 0 12px 0;
+        /* Панель активных фильтров на главном экране */
+        .active-filters-info {
             display: flex;
-            align-items: center;
-            gap: 10px;
-            color: #a855f7;
+            gap: 6px;
+            margin-bottom: 16px;
+            flex-wrap: wrap;
         }
 
-        .week-banner::after {
-            content: '';
-            flex: 1;
-            height: 1px;
-            background: linear-gradient(90deg, rgba(168, 85, 247, 0.4), transparent);
+        .badge-info {
+            font-size: 11px;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid var(--border-color);
+            padding: 4px 10px;
+            border-radius: 20px;
+            color: var(--hint-color);
+            font-weight: 500;
         }
 
+        /* Карточка дня */
         .day-card {
             background: var(--card-bg);
             border-radius: 20px;
@@ -208,9 +163,9 @@
         }
 
         .lesson-card.skipped {
-            opacity: 0.4;
-            background: rgba(0, 0, 0, 0.15);
-            border: 1px dashed rgba(255, 255, 255, 0.15);
+            opacity: 0.45;
+            background: rgba(0, 0, 0, 0.2);
+            border: 1px dashed rgba(255, 255, 255, 0.2);
         }
 
         .lesson-time-box {
@@ -245,7 +200,7 @@
         }
 
         .lesson-title {
-            font-size: 15px;
+            font-size: 14px;
             font-weight: 700;
         }
 
@@ -260,7 +215,8 @@
         .tag-lk { background: var(--lk-bg); color: var(--lk-color); }
         .tag-pz { background: var(--pz-bg); color: var(--pz-color); }
         .tag-lr { background: var(--lr-bg); color: var(--lr-color); }
-        .tag-skip { background: rgba(239, 68, 68, 0.15); color: #f87171; }
+        .tag-subgroup { background: rgba(168, 85, 247, 0.15); color: #c084fc; }
+        .tag-skip { background: rgba(239, 68, 68, 0.2); color: #f87171; border: 1px solid rgba(239, 68, 68, 0.3); }
 
         .lesson-meta {
             display: flex;
@@ -272,6 +228,23 @@
             flex-wrap: wrap;
         }
 
+        .week-banner {
+            font-size: 15px;
+            font-weight: 800;
+            margin: 24px 0 12px 0;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            color: #a855f7;
+        }
+
+        .week-banner::after {
+            content: '';
+            flex: 1;
+            height: 1px;
+            background: linear-gradient(90deg, rgba(168, 85, 247, 0.4), transparent);
+        }
+
         .empty-state {
             text-align: center;
             padding: 40px 20px;
@@ -281,32 +254,219 @@
             border-radius: 16px;
             border: 1px dashed var(--border-color);
         }
+
+        /* МОДАЛЬНОЕ ОКНО НАСТРОЕК */
+        .modal-overlay {
+            position: fixed;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(0, 0, 0, 0.6);
+            backdrop-filter: blur(5px);
+            display: none;
+            align-items: flex-end;
+            z-index: 1000;
+            transition: opacity 0.3s ease;
+        }
+
+        .modal-overlay.open {
+            display: flex;
+        }
+
+        .modal-content {
+            background: var(--card-bg);
+            width: 100%;
+            max-height: 85vh;
+            border-top-left-radius: 24px;
+            border-top-right-radius: 24px;
+            padding: 20px 20px 36px 20px;
+            overflow-y: auto;
+            border-top: 1px solid var(--border-color);
+            box-shadow: 0 -10px 30px rgba(0,0,0,0.3);
+            animation: slideUp 0.3s cubic-bezier(0.1, 1, 0.1, 1);
+        }
+
+        @keyframes slideUp {
+            from { transform: translateY(100%); }
+            to { transform: translateY(0); }
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .modal-header h2 {
+            font-size: 18px;
+            font-weight: 800;
+            margin: 0;
+        }
+
+        .close-modal-btn {
+            background: rgba(255, 255, 255, 0.08);
+            border: none;
+            color: var(--text-color);
+            width: 32px; height: 32px;
+            border-radius: 50%;
+            font-size: 16px;
+            cursor: pointer;
+            display: flex; align-items: center; justify-content: center;
+        }
+
+        .settings-section {
+            margin-bottom: 20px;
+        }
+
+        .settings-section label {
+            display: block;
+            font-size: 13px;
+            font-weight: 700;
+            color: var(--hint-color);
+            margin-bottom: 8px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        /* Переключатели внутри модалки */
+        .subgroup-switch, .mode-switch {
+            display: flex;
+            background: rgba(0, 0, 0, 0.25);
+            padding: 4px;
+            border-radius: 12px;
+            gap: 4px;
+            border: 1px solid var(--border-color);
+        }
+
+        .subgroup-btn, .mode-btn {
+            flex: 1;
+            padding: 8px 0;
+            border: none;
+            background: transparent;
+            color: var(--hint-color);
+            font-weight: 600;
+            font-size: 13px;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            text-align: center;
+        }
+
+        .subgroup-btn.active, .mode-btn.active {
+            background: var(--button-color);
+            color: var(--button-text);
+        }
+
+        /* Список выбора пропусков в настройках */
+        .skip-list-container {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            max-height: 250px;
+            overflow-y: auto;
+            padding-right: 4px;
+        }
+
+        .skip-item {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            background: rgba(255, 255, 255, 0.03);
+            padding: 10px 12px;
+            border-radius: 10px;
+            border: 1px solid var(--border-color);
+            font-size: 13px;
+        }
+
+        .skip-item input[type="checkbox"] {
+            width: 18px; height: 18px;
+            accent-color: var(--button-color);
+            cursor: pointer;
+        }
+
+        .save-settings-btn {
+            width: 100%;
+            background: var(--button-color);
+            color: var(--button-text);
+            border: none;
+            padding: 14px;
+            border-radius: 14px;
+            font-size: 15px;
+            font-weight: 700;
+            cursor: pointer;
+            margin-top: 10px;
+            box-shadow: 0 4px 14px rgba(59, 130, 246, 0.35);
+        }
     </style>
 </head>
 <body>
 
+    <!-- Шапка главного меню -->
     <header>
         <div class="header-title">
-            <h1>БГУИР Расписание</h1>
-            <p>Календарь семестра</p>
+            <h1>Расписание БГУИР</h1>
+            <p id="current-mode-label">Загрузка...</p>
         </div>
-        <div class="subgroup-badge">1-я Подгруппа</div>
+        <button class="settings-btn" onclick="openModal()">
+            ⚙️ Настройки
+        </button>
     </header>
 
-    <div class="mode-switch">
-        <button class="mode-btn active" id="btn-mode-single" onclick="setMode('single')">По неделям</button>
-        <button class="mode-btn" id="btn-mode-all" onclick="setMode('all')">Все 4 недели</button>
-    </div>
+    <!-- Информационная плашка выбранных фильтров -->
+    <div class="active-filters-info" id="active-filters-info"></div>
 
-    <div class="week-selector" id="week-selector">
-        <div class="week-chip active" onclick="selectWeek(1)">Неделя 1</div>
-        <div class="week-chip" onclick="selectWeek(2)">Неделя 2</div>
-        <div class="week-chip" onclick="selectWeek(3)">Неделя 3</div>
-        <div class="week-chip" onclick="selectWeek(4)">Неделя 4</div>
-    </div>
-
+    <!-- Контейнер для отображения расписания -->
     <div id="schedule-container">
         <div class="empty-state">⏳ Загрузка расписания...</div>
+    </div>
+
+    <!-- МОДАЛЬНОЕ ОКНО НАСТРОЕК -->
+    <div class="modal-overlay" id="settingsModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>⚙️ Настройки приложения</h2>
+                <button class="close-modal-btn" onclick="closeModal()">✕</button>
+            </div>
+
+            <!-- 1. Выбор подгруппы -->
+            <div class="settings-section">
+                <label>Подгруппа</label>
+                <div class="subgroup-switch">
+                    <button class="subgroup-btn active" id="sg-all" onclick="setSubgroup(0)">Все</button>
+                    <button class="subgroup-btn" id="sg-1" onclick="setSubgroup(1)">1 подгр.</button>
+                    <button class="subgroup-btn" id="sg-2" onclick="setSubgroup(2)">2 подгр.</button>
+                </div>
+            </div>
+
+            <!-- 2. Режим отображения -->
+            <div class="settings-section">
+                <label>Режим просмотра</label>
+                <div class="mode-switch">
+                    <button class="mode-btn active" id="btn-mode-single" onclick="setMode('single')">Одна неделя</button>
+                    <button class="mode-btn" id="btn-mode-all" onclick="setMode('all')">Все 4 недели</button>
+                </div>
+            </div>
+
+            <!-- Выбор недели (если выбран режим "Одна неделя") -->
+            <div class="settings-section" id="week-select-section">
+                <label>Активная учебная неделя</label>
+                <div class="subgroup-switch">
+                    <button class="subgroup-btn active" id="w-btn-1" onclick="selectWeek(1)">1</button>
+                    <button class="subgroup-btn" id="w-btn-2" onclick="selectWeek(2)">2</button>
+                    <button class="subgroup-btn" id="w-btn-3" onclick="selectWeek(3)">3</button>
+                    <button class="subgroup-btn" id="w-btn-4" onclick="selectWeek(4)">4</button>
+                </div>
+            </div>
+
+            <!-- 3. Управление пропусками -->
+            <div class="settings-section">
+                <label>Отметить пропуски</label>
+                <div class="skip-list-container" id="skip-list-container">
+                    <!-- Заполняется динамически уникальными предметами -->
+                </div>
+            </div>
+
+            <button class="save-settings-btn" onclick="closeModal()">Сохранить и закрыть</button>
+        </div>
     </div>
 
     <script>
@@ -315,65 +475,152 @@
 
         let currentWeek = 1;
         let viewMode = 'single';
+        let currentSubgroup = 0; // 0 = Все, 1 = 1п, 2 = 2п
         let scheduleData = {};
+        let allUniqueLessons = []; // Список всех уникальных пар для меню пропусков
+        
+        // Хранилище пропусков в localStorage
+        let skippedLessons = new Set(JSON.parse(localStorage.getItem('skipped_lessons') || '[]'));
 
-        // 📅 ТОЧКА ОТСЧЕТА: Понедельник первой учебной недели
-        const semesterStart = new Date(2026, 9, 26); // Измени под дату своего начала семестра (год, месяц с 0, число)
+        // 📅 Понедельник первой учебной недели
+        const semesterStart = new Date(2026, 9, 26);
 
         const dayMapping = {
-            "Понедельник": 0,
-            "Вторник": 1,
-            "Среда": 2,
-            "Четверг": 3,
-            "Пятница": 4,
-            "Суббота": 5
+            "Понедельник": 0, "Вторник": 1, "Среда": 2, "Четверг": 3, "Пятница": 4, "Суббота": 5
         };
 
         function getDateForLesson(weekNum, dayName) {
             const dayOffset = dayMapping[dayName] || 0;
             const totalDaysOffset = (weekNum - 1) * 7 + dayOffset;
-            
             const lessonDate = new Date(semesterStart);
             lessonDate.setDate(semesterStart.getDate() + totalDaysOffset);
             
             return lessonDate.toLocaleDateString('ru-RU', {
-                day: 'numeric',
-                month: 'long',
-                weekday: 'short'
+                day: 'numeric', month: 'long', weekday: 'short'
             });
         }
 
-        // Загружаем schedule.json с GitHub Pages
+        // Загрузка schedule.json
         fetch('schedule.json')
             .then(response => {
-                if (!response.ok) throw new Error('Файл schedule.json не найден');
+                if (!response.ok) throw new Error('schedule.json не найден');
                 return response.json();
             })
             .then(data => {
                 scheduleData = data;
+                extractUniqueLessons();
                 renderSchedule();
+                updateHeaderInfo();
             })
             .catch(err => {
                 console.error(err);
                 document.getElementById('schedule-container').innerHTML = `
-                    <div class="empty-state">⚠️ Не удалось загрузить расписание. Убедитесь, что файл schedule.json добавлен в репозиторий.</div>
+                    <div class="empty-state">⚠️ Ошибка загрузки schedule.json. Убедитесь, что файл добавлен в репозиторий GitHub.</div>
                 `;
             });
+
+        // Сбор всех уникальных занятий для настройки пропусков в модалке
+        function extractUniqueLessons() {
+            allUniqueLessons = [];
+            const seen = new Set();
+            for (let w = 1; w <= 4; w++) {
+                if (!scheduleData[w]) continue;
+                scheduleData[w].forEach(d => {
+                    d.lessons.forEach(l => {
+                        if (!seen.has(l.id)) {
+                            seen.add(l.id);
+                            allUniqueLessons.push(l);
+                        }
+                    });
+                });
+            }
+            renderSkipList();
+        }
+
+        function renderSkipList() {
+            const container = document.getElementById('skip-list-container');
+            if (allUniqueLessons.length === 0) {
+                container.innerHTML = `<div style="font-size:12px; color:var(--hint-color); text-align:center;">Нет доступных пар</div>`;
+                return;
+            }
+
+            container.innerHTML = allUniqueLessons.map(l => {
+                const isChecked = skippedLessons.has(l.id);
+                return `
+                    <div class="skip-item">
+                        <div>
+                            <strong>${l.title}</strong> (${l.type})<br>
+                            <span style="font-size:11px; color:var(--hint-color);">${l.time} • Неделя ${l.id.split('_')[0].replace('w','')}</span>
+                        </div>
+                        <input type="checkbox" ${isChecked ? 'checked' : ''} onchange="toggleSkipModal('${l.id}')">
+                    </div>
+                `;
+            }).join('');
+        }
+
+        function toggleSkipModal(lessonId) {
+            if (skippedLessons.has(lessonId)) {
+                skippedLessons.delete(lessonId);
+            } else {
+                skippedLessons.add(lessonId);
+            }
+            localStorage.setItem('skipped_lessons', JSON.stringify(Array.from(skippedLessons)));
+            renderSchedule();
+        }
+
+        // Управление модальным окном
+        function openModal() {
+            document.getElementById('settingsModal').classList.add('open');
+        }
+
+        function closeModal() {
+            document.getElementById('settingsModal').classList.remove('open');
+        }
+
+        function setSubgroup(sg) {
+            currentSubgroup = sg;
+            document.getElementById('sg-all').classList.toggle('active', sg === 0);
+            document.getElementById('sg-1').classList.toggle('active', sg === 1);
+            document.getElementById('sg-2').classList.toggle('active', sg === 2);
+            renderSchedule();
+            updateHeaderInfo();
+        }
 
         function setMode(mode) {
             viewMode = mode;
             document.getElementById('btn-mode-single').classList.toggle('active', mode === 'single');
             document.getElementById('btn-mode-all').classList.toggle('active', mode === 'all');
-            document.getElementById('week-selector').style.display = (mode === 'single') ? 'flex' : 'none';
+            document.getElementById('week-select-section').style.display = (mode === 'single') ? 'block' : 'none';
             renderSchedule();
+            updateHeaderInfo();
         }
 
         function selectWeek(weekNum) {
             currentWeek = weekNum;
-            document.querySelectorAll('.week-chip').forEach((chip, idx) => {
-                chip.classList.toggle('active', idx + 1 === weekNum);
-            });
+            for(let i=1; i<=4; i++) {
+                document.getElementById(`w-btn-${i}`).classList.toggle('active', i === weekNum);
+            }
             renderSchedule();
+            updateHeaderInfo();
+        }
+
+        function updateHeaderInfo() {
+            const modeText = viewMode === 'single' ? `Неделя №${currentWeek}` : 'Все 4 недели';
+            const sgText = currentSubgroup === 0 ? 'Все подгруппы' : `${currentSubgroup} подгруппа`;
+            
+            document.getElementById('current-mode-label').innerText = `${modeText} • ${sgText}`;
+
+            // Информационные плашки под шапкой
+            document.getElementById('active-filters-info').innerHTML = `
+                <span class="badge-info">📌 ${modeText}</span>
+                <span class="badge-info">👥 ${sgText}</span>
+                <span class="badge-info">👁️‍🗨️ Пропусков: ${skippedLessons.size}</span>
+            `;
+        }
+
+        function filterLessons(lessons) {
+            if (currentSubgroup === 0) return lessons;
+            return lessons.filter(l => l.subgroup === 0 || l.subgroup === currentSubgroup);
         }
 
         function buildWeekHtml(weekNum, days) {
@@ -381,9 +628,14 @@
                 return `<div class="empty-state">🎉 На этой неделе пар нет!</div>`;
             }
 
-            return days.map(d => {
-                const total = d.lessons.length;
-                const skippedCount = d.lessons.filter(l => l.isSkipped).length;
+            let weekHasLessons = false;
+            let html = days.map(d => {
+                const filtered = filterLessons(d.lessons);
+                if (filtered.length === 0) return '';
+                
+                weekHasLessons = true;
+                const total = filtered.length;
+                const activeCount = filtered.filter(l => !skippedLessons.has(l.id)).length;
                 const exactDate = getDateForLesson(weekNum, d.day);
                 
                 return `
@@ -393,11 +645,13 @@
                             <span class="day-name">📅 ${d.day}</span>
                             <span class="day-date">${exactDate}</span>
                         </div>
-                        <div class="day-count">${total - skippedCount}/${total} пар</div>
+                        <div class="day-count">${activeCount}/${total} пар</div>
                     </div>
                     <div class="lesson-list">
-                        ${d.lessons.map(l => `
-                            <div class="lesson-card ${l.isSkipped ? 'skipped' : ''}">
+                        ${filtered.map(l => {
+                            const isSkipped = skippedLessons.has(l.id);
+                            return `
+                            <div class="lesson-card ${isSkipped ? 'skipped' : ''}">
                                 <div class="lesson-time-box">
                                     <span class="lesson-time-start">${l.time}</span>
                                 </div>
@@ -405,18 +659,21 @@
                                     <div class="lesson-top-row">
                                         <span class="lesson-title">${l.title}</span>
                                         <span class="tag tag-${l.type.toLowerCase()}">${l.type}</span>
-                                        ${l.isSkipped ? '<span class="tag tag-skip">Пропуск</span>' : ''}
+                                        ${l.subgroup > 0 ? `<span class="tag tag-subgroup">${l.subgroup}п</span>` : ''}
+                                        ${isSkipped ? '<span class="tag tag-skip">Пропуск</span>' : ''}
                                     </div>
                                     <div class="lesson-meta">
                                         ${l.room ? `<span>📍 ${l.room}</span>` : ''}
-                                        ${l.teacher ? `<span>👨‍🏫 ${l.teacher}</span>` : ''}
                                     </div>
                                 </div>
                             </div>
-                        `).join('')}
+                            `;
+                        }).join('')}
                     </div>
                 </div>
             `}).join('');
+
+            return weekHasLessons ? html : `<div class="empty-state">🎉 Для выбранной подгруппы пар на этой неделе нет!</div>`;
         }
 
         function renderSchedule() {
