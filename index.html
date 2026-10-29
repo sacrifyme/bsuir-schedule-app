@@ -16,12 +16,15 @@
             --button-text: var(--tg-theme-button-text-color, #ffffff);
             --border-color: rgba(255, 255, 255, 0.08);
             
-            --lk-bg: rgba(59, 130, 246, 0.15);
-            --lk-color: #60a5fa;
-            --pz-bg: rgba(245, 158, 11, 0.15);
-            --pz-color: #fbbf24;
-            --lr-bg: rgba(16, 185, 129, 0.15);
-            --lr-color: #34d399;
+            /* Новые цвета по категориям */
+            --lk-bg: rgba(16, 185, 129, 0.15);   /* Лекция - Зеленый */
+            --lk-color: #34d399;
+            
+            --pz-bg: rgba(239, 68, 68, 0.15);    /* Практика - Красный */
+            --pz-color: #f87171;
+            
+            --lr-bg: rgba(245, 158, 11, 0.15);   /* Лаба - Желтый */
+            --lr-color: #fbbf24;
         }
 
         * {
@@ -160,10 +163,11 @@
             border: 1px solid var(--border-color);
         }
 
+        /* Затемнение для пропусков без цвета */
         .lesson-card.skipped {
-            opacity: 0.45;
-            background: rgba(0, 0, 0, 0.2);
-            border: 1px dashed rgba(255, 255, 255, 0.2);
+            opacity: 0.4;
+            background: rgba(0, 0, 0, 0.25);
+            border: 1px dashed rgba(255, 255, 255, 0.15);
         }
 
         .lesson-time-box {
@@ -210,11 +214,13 @@
             text-transform: uppercase;
         }
 
+        /* Цветовые стили тегов */
         .tag-lk { background: var(--lk-bg); color: var(--lk-color); }
         .tag-pz { background: var(--pz-bg); color: var(--pz-color); }
         .tag-lr { background: var(--lr-bg); color: var(--lr-color); }
+        
         .tag-subgroup { background: rgba(168, 85, 247, 0.15); color: #c084fc; }
-        .tag-skip { background: rgba(239, 68, 68, 0.2); color: #f87171; border: 1px solid rgba(239, 68, 68, 0.3); }
+        .tag-skip { background: rgba(255, 255, 255, 0.1); color: var(--hint-color); border: 1px solid rgba(255, 255, 255, 0.2); }
 
         .lesson-meta {
             display: flex;
@@ -352,7 +358,7 @@
             color: var(--button-text);
         }
 
-        /* Блоки категорий для множественного выбора */
+        /* Блоки категорий */
         .category-skip-group {
             background: rgba(0, 0, 0, 0.2);
             border: 1px solid var(--border-color);
@@ -535,7 +541,6 @@
                 `;
             });
 
-        // Сбор уникальных предметов по категориям с защитой от регистра
         function extractCategorizedSubjects() {
             const seen = { LK: new Set(), PZ: new Set(), LR: new Set() };
             categorizedSubjects = { LK: [], PZ: [], LR: [] };
@@ -563,7 +568,6 @@
             renderCategoryCheckboxes();
         }
 
-        // Рендерим списки с чекбоксами для каждой категории
         function renderCategoryCheckboxes() {
             const catMap = { LK: 'list-lk', PZ: 'list-pz', LR: 'list-lr' };
 
@@ -589,7 +593,6 @@
             });
         }
 
-        // Обработка клика по чекбоксу предмета
         function toggleSubjectSkip(subjectKey) {
             if (skippedSubjects.has(subjectKey)) {
                 skippedSubjects.delete(subjectKey);
