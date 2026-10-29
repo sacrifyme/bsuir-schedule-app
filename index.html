@@ -16,14 +16,11 @@
             --button-text: var(--tg-theme-button-text-color, #ffffff);
             --border-color: rgba(255, 255, 255, 0.08);
             
-            /* Новые цвета по категориям */
-            --lk-bg: rgba(16, 185, 129, 0.15);   /* Лекция - Зеленый */
+            --lk-bg: rgba(16, 185, 129, 0.15);
             --lk-color: #34d399;
-            
-            --pz-bg: rgba(239, 68, 68, 0.15);    /* Практика - Красный */
+            --pz-bg: rgba(239, 68, 68, 0.15);
             --pz-color: #f87171;
-            
-            --lr-bg: rgba(245, 158, 11, 0.15);   /* Лаба - Желтый */
+            --lr-bg: rgba(245, 158, 11, 0.15);
             --lr-color: #fbbf24;
         }
 
@@ -42,7 +39,6 @@
             line-height: 1.4;
         }
 
-        /* Шапка */
         header {
             display: flex;
             align-items: center;
@@ -102,7 +98,6 @@
             font-weight: 500;
         }
 
-        /* Карточка дня */
         .day-card {
             background: var(--card-bg);
             border-radius: 20px;
@@ -163,7 +158,6 @@
             border: 1px solid var(--border-color);
         }
 
-        /* Затемнение для пропусков без цвета */
         .lesson-card.skipped {
             opacity: 0.4;
             background: rgba(0, 0, 0, 0.25);
@@ -214,11 +208,9 @@
             text-transform: uppercase;
         }
 
-        /* Цветовые стили тегов */
         .tag-lk { background: var(--lk-bg); color: var(--lk-color); }
         .tag-pz { background: var(--pz-bg); color: var(--pz-color); }
         .tag-lr { background: var(--lr-bg); color: var(--lr-color); }
-        
         .tag-subgroup { background: rgba(168, 85, 247, 0.15); color: #c084fc; }
         .tag-skip { background: rgba(255, 255, 255, 0.1); color: var(--hint-color); border: 1px solid rgba(255, 255, 255, 0.2); }
 
@@ -232,21 +224,21 @@
             flex-wrap: wrap;
         }
 
-        .week-banner {
-            font-size: 15px;
+        .month-banner {
+            font-size: 16px;
             font-weight: 800;
-            margin: 24px 0 12px 0;
+            margin: 20px 0 12px 0;
+            color: #60a5fa;
             display: flex;
             align-items: center;
-            gap: 10px;
-            color: #a855f7;
+            gap: 8px;
         }
 
-        .week-banner::after {
+        .month-banner::after {
             content: '';
             flex: 1;
             height: 1px;
-            background: linear-gradient(90deg, rgba(168, 85, 247, 0.4), transparent);
+            background: linear-gradient(90deg, rgba(96, 165, 250, 0.4), transparent);
         }
 
         .empty-state {
@@ -358,7 +350,6 @@
             color: var(--button-text);
         }
 
-        /* Блоки категорий */
         .category-skip-group {
             background: rgba(0, 0, 0, 0.2);
             border: 1px solid var(--border-color);
@@ -401,6 +392,37 @@
         .checkbox-item input[type="checkbox"] {
             width: 16px; height: 16px;
             accent-color: var(--button-color);
+            cursor: pointer;
+        }
+
+        .work-gen-btn {
+            width: 100%;
+            background: #10b981;
+            color: #ffffff;
+            border: none;
+            padding: 12px;
+            border-radius: 12px;
+            font-size: 14px;
+            font-weight: 700;
+            cursor: pointer;
+            margin-top: 8px;
+            box-shadow: 0 4px 14px rgba(16, 185, 129, 0.3);
+        }
+
+        .work-output-box {
+            background: rgba(0, 0, 0, 0.3);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 10px;
+            font-family: monospace;
+            font-size: 12px;
+            color: var(--text-color);
+            margin-top: 10px;
+            white-space: pre-wrap;
+            word-break: break-all;
+            max-height: 120px;
+            overflow-y: auto;
+            display: none;
             cursor: pointer;
         }
 
@@ -458,12 +480,22 @@
                 <label>Режим просмотра</label>
                 <div class="mode-switch">
                     <button class="mode-btn active" id="btn-mode-single" onclick="setMode('single')">Одна неделя</button>
-                    <button class="mode-btn" id="btn-mode-all" onclick="setMode('all')">Все 4 недели</button>
+                    <button class="mode-btn" id="btn-mode-all" onclick="setMode('all')">Весь семестр</button>
+                </div>
+            </div>
+
+            <!-- Выбор месяца (активен в режиме "Весь семестр") -->
+            <div class="settings-section" id="month-select-section" style="display: none;">
+                <label>Месяц отображения</label>
+                <div class="subgroup-switch">
+                    <button class="subgroup-btn active" id="m-btn-10" onclick="selectMonth(10)">Окт</button>
+                    <button class="subgroup-btn" id="m-btn-11" onclick="selectMonth(11)">Ноя</button>
+                    <button class="subgroup-btn" id="m-btn-12" onclick="selectMonth(12)">Дек</button>
                 </div>
             </div>
 
             <div class="settings-section" id="week-select-section">
-                <label>Активная учебная неделя</label>
+                <label>Активная учебная неделя шаблона</label>
                 <div class="subgroup-switch">
                     <button class="subgroup-btn active" id="w-btn-1" onclick="selectWeek(1)">1</button>
                     <button class="subgroup-btn" id="w-btn-2" onclick="selectWeek(2)">2</button>
@@ -473,25 +505,29 @@
             </div>
 
             <div class="settings-section">
-                <label>Множественный выбор пропускаемых предметов</label>
+                <label>Пропускаемые предметы</label>
                 
-                <!-- Лекции -->
                 <div class="category-skip-group">
                     <div class="category-skip-title lk">📖 Лекции (ЛК)</div>
                     <div class="checkbox-list" id="list-lk"></div>
                 </div>
 
-                <!-- Практические -->
                 <div class="category-skip-group">
                     <div class="category-skip-title pz">📝 Практические (ПЗ)</div>
                     <div class="checkbox-list" id="list-pz"></div>
                 </div>
 
-                <!-- Лабораторные -->
                 <div class="category-skip-group">
                     <div class="category-skip-title lr">💻 Лабораторные (ЛР)</div>
                     <div class="checkbox-list" id="list-lr"></div>
                 </div>
+            </div>
+
+            <!-- Блок генератора рабочего времени по месяцам -->
+            <div class="settings-section">
+                <label>График работы за выбранный месяц</label>
+                <button class="work-gen-btn" onclick="generateWorkSchedule()">📋 Сгенерировать текст (выбранный месяц)</button>
+                <div class="work-output-box" id="workOutputBox" onclick="copyWorkScheduleText()" title="Нажмите, чтобы скопировать"></div>
             </div>
 
             <button class="save-settings-btn" onclick="closeModal()">Сохранить и закрыть</button>
@@ -505,21 +541,15 @@
         let currentWeek = 1;
         let viewMode = 'single';
         let currentSubgroup = 0;
+        let currentMonth = 10; // По умолчанию октябрь (10)
         let scheduleData = {};
         
         let skippedSubjects = new Set(JSON.parse(localStorage.getItem('skipped_subjects') || '[]'));
         let categorizedSubjects = { LK: [], PZ: [], LR: [] };
 
         const semesterStart = new Date(2026, 9, 26);
+        const semesterEnd = new Date(2026, 11, 21); // 21 декабря
         const dayMapping = { "Понедельник": 0, "Вторник": 1, "Среда": 2, "Четверг": 3, "Пятница": 4, "Суббота": 5 };
-
-        function getDateForLesson(weekNum, dayName) {
-            const dayOffset = dayMapping[dayName] || 0;
-            const totalDaysOffset = (weekNum - 1) * 7 + dayOffset;
-            const lessonDate = new Date(semesterStart);
-            lessonDate.setDate(semesterStart.getDate() + totalDaysOffset);
-            return lessonDate.toLocaleDateString('ru-RU', { day: 'numeric', month: 'long', weekday: 'short' });
-        }
 
         const jsonUrl = window.location.href.includes('github.io') ? './schedule.json' : 'schedule.json';
 
@@ -551,7 +581,6 @@
                     d.lessons.forEach(l => {
                         const rawType = (l.type || '').toUpperCase();
                         let targetKey = '';
-                        
                         if (rawType.includes('ЛК')) targetKey = 'LK';
                         else if (rawType.includes('ПЗ')) targetKey = 'PZ';
                         else if (rawType.includes('ЛР')) targetKey = 'LR';
@@ -620,7 +649,10 @@
             viewMode = mode;
             document.getElementById('btn-mode-single').classList.toggle('active', mode === 'single');
             document.getElementById('btn-mode-all').classList.toggle('active', mode === 'all');
+            
             document.getElementById('week-select-section').style.display = (mode === 'single') ? 'block' : 'none';
+            document.getElementById('month-select-section').style.display = (mode === 'all') ? 'block' : 'none';
+            
             renderSchedule();
             updateHeaderInfo();
         }
@@ -634,8 +666,18 @@
             updateHeaderInfo();
         }
 
+        function selectMonth(monthNum) {
+            currentMonth = monthNum;
+            [10, 11, 12].forEach(m => {
+                const btn = document.getElementById(`m-btn-${m}`);
+                if (btn) btn.classList.toggle('active', m === monthNum);
+            });
+            renderSchedule();
+            updateHeaderInfo();
+        }
+
         function updateHeaderInfo() {
-            const modeText = viewMode === 'single' ? `Неделя №${currentWeek}` : 'Все 4 недели';
+            const modeText = viewMode === 'single' ? `Неделя №${currentWeek}` : `Месяц: ${currentMonth === 10 ? 'Октябрь' : currentMonth === 11 ? 'Ноябрь' : 'Декабрь'}`;
             const sgText = currentSubgroup === 0 ? 'Все подгруппы' : `${currentSubgroup} подгруппа`;
             
             document.getElementById('current-mode-label').innerText = `${modeText} • ${sgText}`;
@@ -651,8 +693,101 @@
             return lessons.filter(l => l.subgroup === 0 || l.subgroup === currentSubgroup);
         }
 
+        // 📋 ГЕНЕРАЦИЯ ГРАФИКА РАБОТЫ ПО ВЫБРАННОМУ МЕСЯЦУ
+        function generateWorkSchedule() {
+            let currDate = new Date(semesterStart);
+            let daySchedules = [];
+            let weekCounter = 1;
+
+            const monthNames = { 10: "Октябрь", 11: "Ноябрь", 12: "Декабрь" };
+
+            while (currDate <= semesterEnd) {
+                const currentCalcWeek = ((weekCounter - 1) % 4) + 1;
+                const days = scheduleData[currentCalcWeek] || [];
+                const dayMappingArr = ["Понедельник", "Вторник", "Среда", "Четверг", "Пятница", "Суббота"];
+
+                days.forEach(d => {
+                    const dayIdx = dayMappingArr.indexOf(d.day);
+                    if (dayIdx !== -1) {
+                        let lessonDate = new Date(currDate);
+                        lessonDate.setDate(currDate.getDate() + dayIdx);
+
+                        // Учитываем только выбранный месяц и границы семестра
+                        if (lessonDate <= semesterEnd && (lessonDate.getMonth() + 1) === currentMonth) {
+                            const filtered = filterLessons(d.lessons);
+                            
+                            let activeLessons = filtered.filter(l => {
+                                const rawType = (l.type || '').toUpperCase();
+                                let targetKey = rawType.includes('ЛК') ? 'LK' : (rawType.includes('PZ') || rawType.includes('ПЗ') ? 'PZ' : 'LR');
+                                return !skippedSubjects.has(`${l.title} (${targetKey})`);
+                            });
+
+                            let workStart = 16;
+                            let workEnd = 27; // 03:00 след дня
+
+                            activeLessons.forEach(l => {
+                                let [hours, minutes] = l.time.split(':').map(Number);
+                                let lessonStartHour = hours + (minutes / 60);
+                                let lessonEndHour = lessonStartHour + 1.5;
+
+                                if (lessonEndHour > 16 && lessonStartHour < 27) {
+                                    if (lessonEndHour > workStart) {
+                                        workStart = Math.ceil(lessonEndHour);
+                                    }
+                                }
+                            });
+
+                            if (workEnd - workStart > 9) {
+                                workEnd = workStart + 9;
+                            }
+
+                            let shiftText = "";
+                            if (workEnd > workStart) {
+                                let formatStart = workStart >= 24 ? workStart - 24 : workStart;
+                                let formatEnd = workEnd >= 24 ? workEnd - 24 : workEnd;
+                                shiftText = `${formatStart}-${formatEnd}`;
+                            } else {
+                                shiftText = "выходной";
+                            }
+
+                            let dayNumStr = lessonDate.toLocaleDateString('ru-RU', { day: 'numeric', month: 'short' });
+                            
+                            let existing = daySchedules.find(item => item.shift === shiftText);
+                            if (existing) {
+                                existing.dates.push(dayNumStr);
+                            } else {
+                                daySchedules.push({ shift: shiftText, dates: [dayNumStr] });
+                            }
+                        }
+                    }
+                });
+
+                currDate.setDate(currDate.getDate() + 7);
+                weekCounter++;
+            }
+
+            let resultString = daySchedules.map(item => {
+                return `${item.dates.join(', ')} (${item.shift})`;
+            }).join('. ') + '.';
+
+            if (daySchedules.length === 0) {
+                resultString = `На ${monthNames[currentMonth]} нет данных или пар.`;
+            }
+
+            const outputBox = document.getElementById('workOutputBox');
+            outputBox.innerText = resultString;
+            outputBox.style.display = 'block';
+        }
+
+        function copyWorkScheduleText() {
+            const text = document.getElementById('workOutputBox').innerText;
+            navigator.clipboard.writeText(text).then(() => {
+                alert("✅ График работы за выбранный месяц скопирован!");
+            });
+        }
+
         function buildWeekHtml(weekNum, days) {
-            if (!days || days.length === 0) return `<div class="empty-state">🎉 На этой неделе пар нет!</div>`;
+            if (!days || days.length === 0) return `<div class="empty-state">🎉 Пар нет!</div>`;
 
             let weekHasLessons = false;
             let html = days.map(d => {
@@ -708,20 +843,104 @@
                 </div>
             `}).join('');
 
-            return weekHasLessons ? html : `<div class="empty-state">🎉 Для выбранной подгруппы пар на этой неделе нет!</div>`;
+            return weekHasLessons ? html : '';
+        }
+
+        function getDateForLesson(weekNum, dayName) {
+            const dayOffset = dayMapping[dayName] || 0;
+            const totalDaysOffset = (weekNum - 1) * 7 + dayOffset;
+            const lessonDate = new Date(semesterStart);
+            lessonDate.setDate(semesterStart.getDate() + totalDaysOffset);
+            return lessonDate.toLocaleDateString('ru-RU', { day: 'numeric', month: 'long', weekday: 'short' });
         }
 
         function renderSchedule() {
             const container = document.getElementById('schedule-container');
+
             if (viewMode === 'single') {
-                container.innerHTML = buildWeekHtml(currentWeek, scheduleData[currentWeek] || []);
+                const days = scheduleData[currentWeek] || [];
+                container.innerHTML = buildWeekHtml(currentWeek, days);
             } else {
-                let html = '';
-                for (let w = 1; w <= 4; w++) {
-                    html += `<div class="week-banner">📌 Учебная неделя №${w}</div>`;
-                    html += buildWeekHtml(w, scheduleData[w] || []);
+                let html = `<div class="month-banner">🗓️ Месяц: ${currentMonth === 10 ? 'Октябрь 2026' : currentMonth === 11 ? 'Ноябрь 2026' : 'Декабрь 2026'}</div>`;
+                let currDate = new Date(semesterStart);
+                let weekCounter = 1;
+                let monthHasContent = false;
+
+                while (currDate <= semesterEnd) {
+                    const currentCalcWeek = ((weekCounter - 1) % 4) + 1;
+                    const days = scheduleData[currentCalcWeek] || [];
+                    const dayMappingArr = ["Понедельник", "Вторник", "Среда", "Четверг", "Пятница", "Суббота"];
+                    
+                    let weekHtml = '';
+                    days.forEach(d => {
+                        const dayIdx = dayMappingArr.indexOf(d.day);
+                        if (dayIdx !== -1) {
+                            let lessonDayDate = new Date(currDate);
+                            lessonDayDate.setDate(currDate.getDate() + dayIdx);
+                            
+                            // Отображаем дни строго выбранного месяца
+                            if (lessonDayDate <= semesterEnd && (lessonDayDate.getMonth() + 1) === currentMonth) {
+                                const filtered = filterLessons(d.lessons);
+                                if (filtered.length > 0) {
+                                    monthHasContent = true;
+                                    const total = filtered.length;
+                                    const activeCount = filtered.filter(l => {
+                                        const rawType = (l.type || '').toUpperCase();
+                                        let targetKey = rawType.includes('ЛК') ? 'LK' : (rawType.includes('PZ') || rawType.includes('ПЗ') ? 'PZ' : 'LR');
+                                        return !skippedSubjects.has(`${l.title} (${targetKey})`);
+                                    }).length;
+
+                                    const exactDateStr = lessonDayDate.toLocaleDateString('ru-RU', { day: 'numeric', month: 'long', weekday: 'short' });
+
+                                    weekHtml += `
+                                    <div class="day-card">
+                                        <div class="day-header">
+                                            <div class="day-title">
+                                                <span class="day-name">📅 ${d.day}</span>
+                                                <span class="day-date">${exactDateStr}</span>
+                                            </div>
+                                            <div class="day-count">${activeCount}/${total} пар</div>
+                                        </div>
+                                        <div class="lesson-list">
+                                            ${filtered.map(l => {
+                                                const rawType = (l.type || '').toUpperCase();
+                                                let targetKey = rawType.includes('ЛК') ? 'LK' : (rawType.includes('PZ') || rawType.includes('ПЗ') ? 'PZ' : 'LR');
+                                                const subjectKey = `${l.title} (${targetKey})`;
+                                                const isSkipped = skippedSubjects.has(subjectKey);
+
+                                                return `
+                                                <div class="lesson-card ${isSkipped ? 'skipped' : ''}">
+                                                    <div class="lesson-time-box">
+                                                        <span class="lesson-time-start">${l.time}</span>
+                                                    </div>
+                                                    <div class="lesson-info">
+                                                        <div class="lesson-top-row">
+                                                            <span class="lesson-title">${l.title}</span>
+                                                            <span class="tag tag-${targetKey.toLowerCase()}">${l.type}</span>
+                                                            ${l.subgroup > 0 ? `<span class="tag tag-subgroup">${l.subgroup}п</span>` : ''}
+                                                            ${isSkipped ? '<span class="tag tag-skip">Пропуск</span>' : ''}
+                                                        </div>
+                                                        <div class="lesson-meta">
+                                                            ${l.room ? `<span>📍 ${l.room}</span>` : ''}
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                `;
+                                            }).join('')}
+                                        </div>
+                                    </div>
+                                    `;
+                                }
+                            }
+                        }
+                    });
+
+                    if (weekHtml) html += weekHtml;
+                    currDate.setDate(currDate.getDate() + 7);
+                    weekCounter++;
                 }
-                container.innerHTML = html;
+
+                container.innerHTML = monthHasContent ? html : `<div class="empty-state">🎉 В этом месяце пар нет!</div>`;
             }
         }
     </script>
