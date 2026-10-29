@@ -559,7 +559,7 @@
         </div>
     </div>
 
-    <script>
+<script>
         const tg = window.Telegram.WebApp;
         tg.expand();
 
@@ -596,7 +596,6 @@
                 `;
             });
 
-        // Вспомогательная функция: расчет времени окончания пары (1 час 25 минут = 85 минут)
         function calculateLessonEnd(startTimeStr) {
             const [h, m] = startTimeStr.split(':').map(Number);
             const totalMinutes = h * 60 + m + 85;
@@ -727,76 +726,135 @@
             return lessons.filter(l => l.subgroup === 0 || l.subgroup === currentSubgroup);
         }
 
-        // 📋 ГЕНЕРАЦИЯ ГРАФИКА РАБОТЫ (отталкиваемся от КОНЦА пары + время на дорогу)
+        // Рендеринг карточки конкретного дня
+        function renderDayCard(dayName, dateObj, lessons) {
+            const filtered = filterLessons(lessons);
+            if (filtered.length === 0) return '';
+
+            const total = filtered.length;
+            const activeCount = filtered.filter(l => {
+                const rawType = (l.type || '').toUpperCase();
+                let targetKey = rawType.includes('ЛК') ? 'LK' : (rawType.includes('PZ') || rawType.includes('ПЗ') ? 'PZ' : 'LR');
+                return !skippedSubjects.has(`${l.title} (${targetKey})`);
+            }).length;
+
+            const exactDateStr = dateObj.toLocaleDateString('ru-RU', { day: 'numeric', month: 'long', weekday: 'short' });
+
+            return `
+            <div class="day-card">
+                <div class="day-header">
+                    <div class="day-title">
+                        <span class="day-name">📅 ${dayName}</span>
+                        <span class="day-date">${exactDateStr}</span>
+                    </div>
+                    <div class="day-count">${activeCount}/${total} пар</div>
+                </div>
+                <div class="lesson-list">
+                    ${filtered.map(l => {
+                        const rawType = (l.type || '').toUpperCase();
+                        let targetKey = rawType.includes('ЛК') ? 'LK' : (rawType.includes('PZ') || rawType.includes('ПЗ') ? 'PZ' : 'LR');
+                        const subjectKey = `${l.title} (${targetKey})`;
+                        const isSkipped = skippedSubjects.has(subjectKey);
+                        const endTime = calculateLessonEnd(l.time);
+
+                        return `
+                        <div class="lesson-card card-${targetKey.toLowerCase()} ${isSkipped ? 'skipped' : ''}">
+                            <div class="lesson-time-box">
+                                <span class="lesson-time-start">${l.time}</span>
+                                <span class="lesson-time-end">➔ ${endTime}</span>
+                            </div>
+                            <div class="lesson-info">
+                                <div class="lesson-top-row">
+                                    <span class="lesson-title">${l.title}</span>
+                                    <span class="tag tag-${targetKey.toLowerCase()}">${l.type}</span>
+                                    ${l.subgroup > 0 ? `<span class="tag tag-subgroup">${l.subgroup}п</span>` : ''}
+                                    ${isSkipped ? '<span class="tag tag-skip">Пропуск</span>' : ''}
+                                </div>
+                                <div class="lesson-meta">
+                                    ${l.room ? `<span>📍 ${l.room}</span>` : ''}
+                                </div>
+                            </div>
+                        </div>
+                        `;
+                    }).join('')}
+                </div>
+            </div>
+            `;
+        }
+
+        // 📋 ГЕНЕРАЦИЯ ГРАФИКА РАБОТЫ (помесячно, строго по датам)
         function generateWorkSchedule() {
             let currDate = new Date(semesterStart);
+            // Приводим к понедельнику текущей недели начала
+            const dayOfWeek = currDate.getDay();
+            const diffToMonday = currDate.getDate() - dayOfWeek + (dayOfWeek === 0 ? -6 : 1);
+            currDate.setDate(diffToMonday);
+
             let daySchedules = [];
             let weekCounter = 1;
 
             while (currDate <= semesterEnd) {
                 const currentCalcWeek = ((weekCounter - 1) % 4) + 1;
-                const days = scheduleData[currentCalcWeek] || [];
-                const dayMappingArr = ["Понедельник", "Вторник", "Среда", "Четверг", "Пятница", "Суббота"];
+                const weekDaysData = scheduleData[currentCalcWeek] || [];
+                
+                // Создаем карту дней недели для текущей недели из JSON
+                const weekMap = {};
+                weekDaysData.forEach(d => { weekMap[d.day] = d.lessons; });
 
-                days.forEach(d => {
-                    const dayIdx = dayMappingArr.indexOf(d.day);
-                    if (dayIdx !== -1) {
-                        let lessonDate = new Date(currDate);
-                        lessonDate.setDate(currDate.getDate() + dayIdx);
+                const dayNamesOrder = ["Понедельник", "Вторник", "Среда", "Четверг", "Пятница", "Суббота"];
 
-                        if (lessonDate <= semesterEnd && (lessonDate.getMonth() + 1) === currentMonth) {
-                            const filtered = filterLessons(d.lessons);
-                            
-                            // Берём только активные (не пропущенные) пары
-                            let activeLessons = filtered.filter(l => {
-                                const rawType = (l.type || '').toUpperCase();
-                                let targetKey = rawType.includes('ЛК') ? 'LK' : (rawType.includes('PZ') || rawType.includes('ПЗ') ? 'PZ' : 'LR');
-                                return !skippedSubjects.has(`${l.title} (${targetKey})`);
+                dayNamesOrder.forEach((dayName, idx) => {
+                    let lessonDate = new Date(currDate);
+                    lessonDate.setDate(currDate.getDate() + idx);
+
+                    if (lessonDate >= semesterStart && lessonDate <= semesterEnd && (lessonDate.getMonth() + 1) === currentMonth) {
+                        const lessons = weekMap[dayName] || [];
+                        const filtered = filterLessons(lessons);
+                        
+                        let activeLessons = filtered.filter(l => {
+                            const rawType = (l.type || '').toUpperCase();
+                            let targetKey = rawType.includes('ЛК') ? 'LK' : (rawType.includes('PZ') || rawType.includes('ПЗ') ? 'PZ' : 'LR');
+                            return !skippedSubjects.has(`${l.title} (${targetKey})`);
+                        });
+
+                        let workStart = 16;
+                        let workEnd = 27;
+
+                        if (activeLessons.length > 0) {
+                            let latestEndHour = 16;
+                            activeLessons.forEach(l => {
+                                const [h, m] = l.time.split(':').map(Number);
+                                const endMinutes = h * 60 + m + 85;
+                                const endHDecimal = endMinutes / 60;
+                                if (endHDecimal > latestEndHour) {
+                                    latestEndHour = endHDecimal;
+                                }
                             });
+                            workStart = Math.ceil(latestEndHour);
+                        }
 
-                            let workStart = 16; // Старт по умолчанию, если пар нет или они заканчиваются рано
-                            let workEnd = 27;   // 03:00 ночи
+                        if (workEnd - workStart > 9) {
+                            workEnd = workStart + 9;
+                        }
 
-                            if (activeLessons.length > 0) {
-                                // Находим самую поздно заканчивающуюся активную пару
-                                let latestEndHour = 16;
-                                activeLessons.forEach(l => {
-                                    const [h, m] = l.time.split(':').map(Number);
-                                    const endMinutes = h * 60 + m + 85; // 1 час 25 мин пара
-                                    const endHDecimal = endMinutes / 60;
-                                    if (endHDecimal > latestEndHour) {
-                                        latestEndHour = endHDecimal;
-                                    }
-                                });
+                        let shiftText = "";
+                        if (workEnd > workStart) {
+                            let formatStart = workStart >= 24 ? workStart - 24 : workStart;
+                            let formatEnd = workEnd >= 24 ? workEnd - 24 : workEnd;
+                            shiftText = `${formatStart}-${formatEnd}`;
+                        } else {
+                            shiftText = "выходной";
+                        }
 
-                                // Время на дорогу: округляем конец пары вверх до целого часа (например, 18:30 -> 19:00)
-                                workStart = Math.ceil(latestEndHour);
-                            }
-
-                            // Ограничиваем смену максимумом в 9 часов, но не позже 03:00 (27 часа)
-                            if (workEnd - workStart > 9) {
-                                workEnd = workStart + 9;
-                            }
-
-                            let shiftText = "";
-                            if (workEnd > workStart) {
-                                let formatStart = workStart >= 24 ? workStart - 24 : workStart;
-                                let formatEnd = workEnd >= 24 ? workEnd - 24 : workEnd;
-                                shiftText = `${formatStart}-${formatEnd}`;
-                            } else {
-                                shiftText = "выходной";
-                            }
-
-                            let day = String(lessonDate.getDate()).padStart(2, '0');
-                            let month = String(lessonDate.getMonth() + 1).padStart(2, '0');
-                            let dateFormatted = `${day}.${month}`;
-                            
-                            let existing = daySchedules.find(item => item.shift === shiftText);
-                            if (existing) {
-                                existing.dates.push(dateFormatted);
-                            } else {
-                                daySchedules.push({ shift: shiftText, dates: [dateFormatted] });
-                            }
+                        let day = String(lessonDate.getDate()).padStart(2, '0');
+                        let month = String(lessonDate.getMonth() + 1).padStart(2, '0');
+                        let dateFormatted = `${day}.${month}`;
+                        
+                        let existing = daySchedules.find(item => item.shift === shiftText);
+                        if (existing) {
+                            existing.dates.push(dateFormatted);
+                        } else {
+                            daySchedules.push({ shift: shiftText, dates: [dateFormatted] });
                         }
                     }
                 });
@@ -827,154 +885,54 @@
             });
         }
 
-        function buildWeekHtml(weekNum, days) {
-            if (!days || days.length === 0) return `<div class="empty-state">🎉 Пар нет!</div>`;
-
-            let weekHasLessons = false;
-            let html = days.map(d => {
-                const filtered = filterLessons(d.lessons);
-                if (filtered.length === 0) return '';
-                
-                weekHasLessons = true;
-                const total = filtered.length;
-                const activeCount = filtered.filter(l => {
-                    const rawType = (l.type || '').toUpperCase();
-                    let targetKey = rawType.includes('ЛК') ? 'LK' : (rawType.includes('PZ') || rawType.includes('ПЗ') ? 'PZ' : 'LR');
-                    return !skippedSubjects.has(`${l.title} (${targetKey})`);
-                }).length;
-                
-                const exactDate = getDateForLesson(weekNum, d.day);
-                
-                return `
-                <div class="day-card">
-                    <div class="day-header">
-                        <div class="day-title">
-                            <span class="day-name">📅 ${d.day}</span>
-                            <span class="day-date">${exactDate}</span>
-                        </div>
-                        <div class="day-count">${activeCount}/${total} пар</div>
-                    </div>
-                    <div class="lesson-list">
-                        ${filtered.map(l => {
-                            const rawType = (l.type || '').toUpperCase();
-                            let targetKey = rawType.includes('ЛК') ? 'LK' : (rawType.includes('PZ') || rawType.includes('ПЗ') ? 'PZ' : 'LR');
-                            const subjectKey = `${l.title} (${targetKey})`;
-                            const isSkipped = skippedSubjects.has(subjectKey);
-                            const endTime = calculateLessonEnd(l.time);
-
-                            return `
-                            <div class="lesson-card card-${targetKey.toLowerCase()} ${isSkipped ? 'skipped' : ''}">
-                                <div class="lesson-time-box">
-                                    <span class="lesson-time-start">${l.time}</span>
-                                    <span class="lesson-time-end">➔ ${endTime}</span>
-                                </div>
-                                <div class="lesson-info">
-                                    <div class="lesson-top-row">
-                                        <span class="lesson-title">${l.title}</span>
-                                        <span class="tag tag-${targetKey.toLowerCase()}">${l.type}</span>
-                                        ${l.subgroup > 0 ? `<span class="tag tag-subgroup">${l.subgroup}п</span>` : ''}
-                                        ${isSkipped ? '<span class="tag tag-skip">Пропуск</span>' : ''}
-                                    </div>
-                                    <div class="lesson-meta">
-                                        ${l.room ? `<span>📍 ${l.room}</span>` : ''}
-                                    </div>
-                                </div>
-                            </div>
-                            `;
-                        }).join('')}
-                    </div>
-                </div>
-            `}).join('');
-
-            return weekHasLessons ? html : '';
-        }
-
-        function getDateForLesson(weekNum, dayName) {
-            const dayOffset = dayMapping[dayName] || 0;
-            const totalDaysOffset = (weekNum - 1) * 7 + dayOffset;
-            const lessonDate = new Date(semesterStart);
-            lessonDate.setDate(semesterStart.getDate() + totalDaysOffset);
-            return lessonDate.toLocaleDateString('ru-RU', { day: 'numeric', month: 'long', weekday: 'short' });
-        }
-
+        // Главная функция рендеринга расписания
         function renderSchedule() {
             const container = document.getElementById('schedule-container');
 
             if (viewMode === 'single') {
+                // Режим одной недели
                 const days = scheduleData[currentWeek] || [];
-                container.innerHTML = buildWeekHtml(currentWeek, days);
+                let html = '';
+                days.forEach(d => {
+                    // Для режима одной недели берем примерную дату начала
+                    const dayOffset = dayMapping[d.day] || 0;
+                    const dummyDate = new Date(semesterStart);
+                    dummyDate.setDate(semesterStart.getDate() + (currentWeek - 1) * 7 + dayOffset);
+                    html += renderDayCard(d.day, dummyDate, d.lessons);
+                });
+                container.innerHTML = html || `<div class="empty-state">🎉 На этой неделе пар нет!</div>`;
             } else {
+                // Режим всего семестра по месяцам
                 let html = `<div class="month-banner">🗓️ Месяц: ${currentMonth === 10 ? 'Октябрь 2026' : currentMonth === 11 ? 'Ноябрь 2026' : 'Декабрь 2026'}</div>`;
+                
                 let currDate = new Date(semesterStart);
+                const dayOfWeek = currDate.getDay();
+                const diffToMonday = currDate.getDate() - dayOfWeek + (dayOfWeek === 0 ? -6 : 1);
+                currDate.setDate(diffToMonday);
+
                 let weekCounter = 1;
                 let monthHasContent = false;
 
                 while (currDate <= semesterEnd) {
                     const currentCalcWeek = ((weekCounter - 1) % 4) + 1;
-                    const days = scheduleData[currentCalcWeek] || [];
-                    const dayMappingArr = ["Понедельник", "Вторник", "Среда", "Четверг", "Пятница", "Суббота"];
+                    const weekDaysData = scheduleData[currentCalcWeek] || [];
                     
+                    const weekMap = {};
+                    weekDaysData.forEach(d => { weekMap[d.day] = d.lessons; });
+
+                    const dayNamesOrder = ["Понедельник", "Вторник", "Среда", "Четверг", "Пятница", "Суббота"];
                     let weekHtml = '';
-                    days.forEach(d => {
-                        const dayIdx = dayMappingArr.indexOf(d.day);
-                        if (dayIdx !== -1) {
-                            let lessonDayDate = new Date(currDate);
-                            lessonDayDate.setDate(currDate.getDate() + dayIdx);
-                            
-                            if (lessonDayDate <= semesterEnd && (lessonDayDate.getMonth() + 1) === currentMonth) {
-                                const filtered = filterLessons(d.lessons);
-                                if (filtered.length > 0) {
-                                    monthHasContent = true;
-                                    const total = filtered.length;
-                                    const activeCount = filtered.filter(l => {
-                                        const rawType = (l.type || '').toUpperCase();
-                                        let targetKey = rawType.includes('ЛК') ? 'LK' : (rawType.includes('PZ') || rawType.includes('ПЗ') ? 'PZ' : 'LR');
-                                        return !skippedSubjects.has(`${l.title} (${targetKey})`);
-                                    }).length;
 
-                                    const exactDateStr = lessonDayDate.toLocaleDateString('ru-RU', { day: 'numeric', month: 'long', weekday: 'short' });
+                    dayNamesOrder.forEach((dayName, idx) => {
+                        let lessonDate = new Date(currDate);
+                        lessonDate.setDate(currDate.getDate() + idx);
 
-                                    weekHtml += `
-                                    <div class="day-card">
-                                        <div class="day-header">
-                                            <div class="day-title">
-                                                <span class="day-name">📅 ${d.day}</span>
-                                                <span class="day-date">${exactDateStr}</span>
-                                            </div>
-                                            <div class="day-count">${activeCount}/${total} пар</div>
-                                        </div>
-                                        <div class="lesson-list">
-                                            ${filtered.map(l => {
-                                                const rawType = (l.type || '').toUpperCase();
-                                                let targetKey = rawType.includes('ЛК') ? 'LK' : (rawType.includes('PZ') || rawType.includes('ПЗ') ? 'PZ' : 'LR');
-                                                const subjectKey = `${l.title} (${targetKey})`;
-                                                const isSkipped = skippedSubjects.has(subjectKey);
-                                                const endTime = calculateLessonEnd(l.time);
-
-                                                return `
-                                                <div class="lesson-card card-${targetKey.toLowerCase()} ${isSkipped ? 'skipped' : ''}">
-                                                    <div class="lesson-time-box">
-                                                        <span class="lesson-time-start">${l.time}</span>
-                                                        <span class="lesson-time-end">➔ ${endTime}</span>
-                                                    </div>
-                                                    <div class="lesson-info">
-                                                        <div class="lesson-top-row">
-                                                            <span class="lesson-title">${l.title}</span>
-                                                            <span class="tag tag-${targetKey.toLowerCase()}">${l.type}</span>
-                                                            ${l.subgroup > 0 ? `<span class="tag tag-subgroup">${l.subgroup}п</span>` : ''}
-                                                            ${isSkipped ? '<span class="tag tag-skip">Пропуск</span>' : ''}
-                                                        </div>
-                                                        <div class="lesson-meta">
-                                                            ${l.room ? `<span>📍 ${l.room}</span>` : ''}
-                                                        </div>
-                                                    </div>
-                                                </div>
-                                                `;
-                                            }).join('')}
-                                        </div>
-                                    </div>
-                                    `;
-                                }
+                        if (lessonDate >= semesterStart && lessonDate <= semesterEnd && (lessonDate.getMonth() + 1) === currentMonth) {
+                            const lessons = weekMap[dayName] || [];
+                            const cardHtml = renderDayCard(dayName, lessonDate, lessons);
+                            if (cardHtml) {
+                                monthHasContent = true;
+                                weekHtml += cardHtml;
                             }
                         }
                     });
