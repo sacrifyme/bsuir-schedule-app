@@ -16,7 +16,6 @@
             --button-text: var(--tg-theme-button-text-color, #ffffff);
             --border-color: rgba(255, 255, 255, 0.08);
             
-            /* Яркие фоны для предметов */
             --lk-card-bg: linear-gradient(135deg, rgba(16, 185, 129, 0.25) 0%, rgba(5, 150, 105, 0.15) 100%);
             --lk-border: rgba(52, 211, 153, 0.4);
             --lk-color: #34d399;
@@ -155,7 +154,6 @@
             gap: 12px;
         }
 
-        /* ЦВЕТНЫЕ ФОНЫ КАРТОЧЕК ПРЕДМЕТОВ */
         .lesson-card {
             display: flex;
             gap: 12px;
@@ -179,7 +177,6 @@
             border: 1px solid var(--lr-border);
         }
 
-        /* Пропуск — обесцвечиваем и затемняем карточку */
         .lesson-card.skipped {
             opacity: 0.35 !important;
             background: rgba(0, 0, 0, 0.3) !important;
@@ -188,19 +185,27 @@
 
         .lesson-time-box {
             display: flex;
+            flex-direction: column;
             align-items: center;
             justify-content: center;
             background: rgba(0, 0, 0, 0.25);
-            padding: 8px 10px;
+            padding: 6px 8px;
             border-radius: 10px;
-            min-width: 60px;
+            min-width: 68px;
             height: fit-content;
         }
 
         .lesson-time-start {
-            font-size: 14px;
+            font-size: 13px;
             font-weight: 800;
             font-family: monospace;
+        }
+
+        .lesson-time-end {
+            font-size: 11px;
+            font-weight: 600;
+            font-family: monospace;
+            color: var(--hint-color);
         }
 
         .lesson-info {
@@ -591,6 +596,15 @@
                 `;
             });
 
+        // Вспомогательная функция: расчет времени окончания пары (1 час 25 минут = 85 минут)
+        function calculateLessonEnd(startTimeStr) {
+            const [h, m] = startTimeStr.split(':').map(Number);
+            const totalMinutes = h * 60 + m + 85;
+            const endH = Math.floor(totalMinutes / 60) % 24;
+            const endM = totalMinutes % 60;
+            return `${String(endH).padStart(2, '0')}:${String(endM).padStart(2, '0')}`;
+        }
+
         function extractCategorizedSubjects() {
             const seen = { LK: new Set(), PZ: new Set(), LR: new Set() };
             categorizedSubjects = { LK: [], PZ: [], LR: [] };
@@ -713,7 +727,7 @@
             return lessons.filter(l => l.subgroup === 0 || l.subgroup === currentSubgroup);
         }
 
-        // 📋 ГЕНЕРАЦИЯ ТЕКСТА РАБОЧЕГО ГРАФИКА
+        // 📋 ГЕНЕРАЦИЯ ГРАФИКА РАБОТЫ (отталкиваемся от КОНЦА пары + время на дорогу)
         function generateWorkSchedule() {
             let currDate = new Date(semesterStart);
             let daySchedules = [];
@@ -733,28 +747,33 @@
                         if (lessonDate <= semesterEnd && (lessonDate.getMonth() + 1) === currentMonth) {
                             const filtered = filterLessons(d.lessons);
                             
+                            // Берём только активные (не пропущенные) пары
                             let activeLessons = filtered.filter(l => {
                                 const rawType = (l.type || '').toUpperCase();
                                 let targetKey = rawType.includes('ЛК') ? 'LK' : (rawType.includes('PZ') || rawType.includes('ПЗ') ? 'PZ' : 'LR');
                                 return !skippedSubjects.has(`${l.title} (${targetKey})`);
                             });
 
-                            let workStart = 16;
-                            let workEnd = 27; // 03:00 ночи
+                            let workStart = 16; // Старт по умолчанию, если пар нет или они заканчиваются рано
+                            let workEnd = 27;   // 03:00 ночи
 
-                            // Учитываем время окончания пар и округляем в большую сторону (время на дорогу)
-                            activeLessons.forEach(l => {
-                                let [hours, minutes] = l.time.split(':').map(Number);
-                                let lessonEndHour = hours + (minutes / 60) + 1.5; // пара 1.5 ч
-
-                                if (lessonEndHour > 16 && lessonEndHour < 27) {
-                                    let roundedStart = Math.ceil(lessonEndHour); // 18:30 -> 19, 20:25 -> 21
-                                    if (roundedStart > workStart) {
-                                        workStart = roundedStart;
+                            if (activeLessons.length > 0) {
+                                // Находим самую поздно заканчивающуюся активную пару
+                                let latestEndHour = 16;
+                                activeLessons.forEach(l => {
+                                    const [h, m] = l.time.split(':').map(Number);
+                                    const endMinutes = h * 60 + m + 85; // 1 час 25 мин пара
+                                    const endHDecimal = endMinutes / 60;
+                                    if (endHDecimal > latestEndHour) {
+                                        latestEndHour = endHDecimal;
                                     }
-                                }
-                            });
+                                });
 
+                                // Время на дорогу: округляем конец пары вверх до целого часа (например, 18:30 -> 19:00)
+                                workStart = Math.ceil(latestEndHour);
+                            }
+
+                            // Ограничиваем смену максимумом в 9 часов, но не позже 03:00 (27 часа)
                             if (workEnd - workStart > 9) {
                                 workEnd = workStart + 9;
                             }
@@ -768,7 +787,6 @@
                                 shiftText = "выходной";
                             }
 
-                            // Формат даты ДД.ММ (например, 26.10)
                             let day = String(lessonDate.getDate()).padStart(2, '0');
                             let month = String(lessonDate.getMonth() + 1).padStart(2, '0');
                             let dateFormatted = `${day}.${month}`;
@@ -787,7 +805,6 @@
                 weekCounter++;
             }
 
-            // Формируем текст с префиксом "Прошу сделать смены..."
             let shiftsText = daySchedules.map(item => {
                 return `${item.dates.join(', ')} (${item.shift})`;
             }).join('. ');
@@ -843,11 +860,13 @@
                             let targetKey = rawType.includes('ЛК') ? 'LK' : (rawType.includes('PZ') || rawType.includes('ПЗ') ? 'PZ' : 'LR');
                             const subjectKey = `${l.title} (${targetKey})`;
                             const isSkipped = skippedSubjects.has(subjectKey);
+                            const endTime = calculateLessonEnd(l.time);
 
                             return `
                             <div class="lesson-card card-${targetKey.toLowerCase()} ${isSkipped ? 'skipped' : ''}">
                                 <div class="lesson-time-box">
                                     <span class="lesson-time-start">${l.time}</span>
+                                    <span class="lesson-time-end">➔ ${endTime}</span>
                                 </div>
                                 <div class="lesson-info">
                                     <div class="lesson-top-row">
@@ -930,11 +949,13 @@
                                                 let targetKey = rawType.includes('ЛК') ? 'LK' : (rawType.includes('PZ') || rawType.includes('ПЗ') ? 'PZ' : 'LR');
                                                 const subjectKey = `${l.title} (${targetKey})`;
                                                 const isSkipped = skippedSubjects.has(subjectKey);
+                                                const endTime = calculateLessonEnd(l.time);
 
                                                 return `
                                                 <div class="lesson-card card-${targetKey.toLowerCase()} ${isSkipped ? 'skipped' : ''}">
                                                     <div class="lesson-time-box">
                                                         <span class="lesson-time-start">${l.time}</span>
+                                                        <span class="lesson-time-end">➔ ${endTime}</span>
                                                     </div>
                                                     <div class="lesson-info">
                                                         <div class="lesson-top-row">
