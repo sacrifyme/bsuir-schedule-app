@@ -352,32 +352,50 @@
             color: var(--button-text);
         }
 
-        /* Выпадающие списки (селекты) для категорий */
-        .select-group {
+        /* Блоки категорий для множественного выбора */
+        .category-skip-group {
+            background: rgba(0, 0, 0, 0.2);
+            border: 1px solid var(--border-color);
+            border-radius: 14px;
+            padding: 12px;
             margin-bottom: 12px;
         }
 
-        .select-group label {
-            font-size: 11px;
-            margin-bottom: 4px;
-            color: var(--text-color);
+        .category-skip-title {
+            font-size: 13px;
+            font-weight: 800;
+            margin-bottom: 8px;
         }
 
-        .settings-select {
-            width: 100%;
-            background: rgba(0, 0, 0, 0.25);
+        .category-skip-title.lk { color: var(--lk-color); }
+        .category-skip-title.pz { color: var(--pz-color); }
+        .category-skip-title.lr { color: var(--lr-color); }
+
+        .checkbox-list {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+            max-height: 150px;
+            overflow-y: auto;
+            padding-right: 4px;
+        }
+
+        .checkbox-item {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            background: rgba(255, 255, 255, 0.03);
+            padding: 8px 10px;
+            border-radius: 8px;
             border: 1px solid var(--border-color);
-            color: var(--text-color);
-            padding: 10px 12px;
-            border-radius: 12px;
-            font-size: 14px;
-            outline: none;
+            font-size: 13px;
             cursor: pointer;
         }
 
-        .settings-select option {
-            background: var(--card-bg);
-            color: var(--text-color);
+        .checkbox-item input[type="checkbox"] {
+            width: 16px; height: 16px;
+            accent-color: var(--button-color);
+            cursor: pointer;
         }
 
         .save-settings-btn {
@@ -449,30 +467,24 @@
             </div>
 
             <div class="settings-section">
-                <label>Выбор пропускаемых предметов по категориям</label>
+                <label>Множественный выбор пропускаемых предметов</label>
                 
                 <!-- Лекции -->
-                <div class="select-group">
-                    <label>📖 Лекции (ЛК)</label>
-                    <select class="settings-select" id="select-lk" onchange="handleCategorySelect('LK', this.value)">
-                        <option value="">Не пропускать</option>
-                    </select>
+                <div class="category-skip-group">
+                    <div class="category-skip-title lk">📖 Лекции (ЛК)</div>
+                    <div class="checkbox-list" id="list-lk"></div>
                 </div>
 
                 <!-- Практические -->
-                <div class="select-group">
-                    <label>📝 Практические (ПЗ)</label>
-                    <select class="settings-select" id="select-pz" onchange="handleCategorySelect('PZ', this.value)">
-                        <option value="">Не пропускать</option>
-                    </select>
+                <div class="category-skip-group">
+                    <div class="category-skip-title pz">📝 Практические (ПЗ)</div>
+                    <div class="checkbox-list" id="list-pz"></div>
                 </div>
 
                 <!-- Лабораторные -->
-                <div class="select-group">
-                    <label>💻 Лабораторные (ЛР)</label>
-                    <select class="settings-select" id="select-lr" onchange="handleCategorySelect('LR', this.value)">
-                        <option value="">Не пропускать</option>
-                    </select>
+                <div class="category-skip-group">
+                    <div class="category-skip-title lr">💻 Лабораторные (ЛР)</div>
+                    <div class="checkbox-list" id="list-lr"></div>
                 </div>
             </div>
 
@@ -523,7 +535,7 @@
                 `;
             });
 
-// Сбор уникальных предметов по категориям (с защитой от разного регистра)
+        // Сбор уникальных предметов по категориям с защитой от регистра
         function extractCategorizedSubjects() {
             const seen = { LK: new Set(), PZ: new Set(), LR: new Set() };
             categorizedSubjects = { LK: [], PZ: [], LR: [] };
@@ -548,46 +560,42 @@
             }
 
             Object.keys(categorizedSubjects).forEach(k => categorizedSubjects[k].sort());
-            populateSelects();
+            renderCategoryCheckboxes();
         }
 
-        // Заполняем выпадающие списки в модалке и выставляем текущие значения
-        function populateSelects() {
-            const catMap = { LK: 'select-lk', PZ: 'select-pz', LR: 'select-lr' };
+        // Рендерим списки с чекбоксами для каждой категории
+        function renderCategoryCheckboxes() {
+            const catMap = { LK: 'list-lk', PZ: 'list-pz', LR: 'list-lr' };
 
             Object.keys(catMap).forEach(cat => {
-                const selectEl = document.getElementById(catMap[cat]);
+                const container = document.getElementById(catMap[cat]);
                 const subjects = categorizedSubjects[cat];
 
-                let optionsHtml = '<option value="">Не пропускать</option>';
-                subjects.forEach(title => {
-                    optionsHtml += `<option value="${title}">${title}</option>`;
-                });
-                selectEl.innerHTML = optionsHtml;
+                if (subjects.length === 0) {
+                    container.innerHTML = `<div style="font-size:12px; color:var(--hint-color); padding:4px;">Нет предметов</div>`;
+                    return;
+                }
 
-                // Ищем, какой предмет из этой категории сейчас в пропущенных
-                let selectedVal = "";
-                subjects.forEach(title => {
-                    if (skippedSubjects.has(`${title} (${cat})`)) {
-                        selectedVal = title;
-                    }
-                });
-                selectEl.value = selectedVal;
+                container.innerHTML = subjects.map(title => {
+                    const subjectKey = `${title} (${cat})`;
+                    const isChecked = skippedSubjects.has(subjectKey);
+                    return `
+                        <label class="checkbox-item">
+                            <span>${title}</span>
+                            <input type="checkbox" ${isChecked ? 'checked' : ''} onchange="toggleSubjectSkip('${subjectKey}')">
+                        </label>
+                    `;
+                }).join('');
             });
         }
 
-        // Обработка выбора предмета в селекте категории
-        function handleCategorySelect(cat, title) {
-            // Сначала удаляем из пропущенных все предметы этой категории, чтобы заменить новым выбором
-            categorizedSubjects[cat].forEach(t => {
-                skippedSubjects.delete(`${t} (${cat})`);
-            });
-
-            // Если выбрали конкретный предмет — добавляем его в пропуски
-            if (title !== "") {
-                skippedSubjects.add(`${title} (${cat})`);
+        // Обработка клика по чекбоксу предмета
+        function toggleSubjectSkip(subjectKey) {
+            if (skippedSubjects.has(subjectKey)) {
+                skippedSubjects.delete(subjectKey);
+            } else {
+                skippedSubjects.add(subjectKey);
             }
-
             localStorage.setItem('skipped_subjects', JSON.stringify(Array.from(skippedSubjects)));
             renderSchedule();
             updateHeaderInfo();
@@ -650,7 +658,12 @@
                 
                 weekHasLessons = true;
                 const total = filtered.length;
-                const activeCount = filtered.filter(l => !skippedSubjects.has(`${l.title} (${l.type})`)).length;
+                const activeCount = filtered.filter(l => {
+                    const rawType = (l.type || '').toUpperCase();
+                    let targetKey = rawType.includes('ЛК') ? 'LK' : (rawType.includes('PZ') || rawType.includes('ПЗ') ? 'PZ' : 'LR');
+                    return !skippedSubjects.has(`${l.title} (${targetKey})`);
+                }).length;
+                
                 const exactDate = getDateForLesson(weekNum, d.day);
                 
                 return `
@@ -664,8 +677,11 @@
                     </div>
                     <div class="lesson-list">
                         ${filtered.map(l => {
-                            const subjectKey = `${l.title} (${l.type})`;
+                            const rawType = (l.type || '').toUpperCase();
+                            let targetKey = rawType.includes('ЛК') ? 'LK' : (rawType.includes('PZ') || rawType.includes('ПЗ') ? 'PZ' : 'LR');
+                            const subjectKey = `${l.title} (${targetKey})`;
                             const isSkipped = skippedSubjects.has(subjectKey);
+
                             return `
                             <div class="lesson-card ${isSkipped ? 'skipped' : ''}">
                                 <div class="lesson-time-box">
@@ -674,7 +690,7 @@
                                 <div class="lesson-info">
                                     <div class="lesson-top-row">
                                         <span class="lesson-title">${l.title}</span>
-                                        <span class="tag tag-${l.type.toLowerCase()}">${l.type}</span>
+                                        <span class="tag tag-${targetKey.toLowerCase()}">${l.type}</span>
                                         ${l.subgroup > 0 ? `<span class="tag tag-subgroup">${l.subgroup}п</span>` : ''}
                                         ${isSkipped ? '<span class="tag tag-skip">Пропуск</span>' : ''}
                                     </div>
