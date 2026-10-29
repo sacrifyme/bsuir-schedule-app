@@ -839,7 +839,18 @@
                                     latestEndHour = endHDecimal;
                                 }
                             });
-                            workStart = Math.ceil(latestEndHour);
+
+                            // Точная привязка работы под время окончания пар:
+                            // 16:55 (окончание) -> работа с 18
+                            // 18:30 (окончание) -> работа с 19
+                            // 20:25 (окончание) -> работа с 21
+                            if (latestEndHour <= 17) {
+                                workStart = 18;
+                            } else if (latestEndHour <= 18.5) {
+                                workStart = 19;
+                            } else {
+                                workStart = 21;
+                            }
                         }
 
                         if (workEnd - workStart > 9) {
