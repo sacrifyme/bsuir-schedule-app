@@ -125,6 +125,40 @@
             margin-bottom: 16px;
             border: 1px solid var(--border-color);
             box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08);
+            position: relative;
+            transition: border-color 0.3s, box-shadow 0.3s;
+        }
+
+        /* Выделение ДНЕЙ (Сегодня и Завтра) */
+        .day-card.is-today {
+            border: 2px solid #3b82f6 !important;
+            box-shadow: 0 0 20px rgba(59, 130, 246, 0.3) !important;
+        }
+
+        .day-card.is-tomorrow {
+            border: 2px solid #a855f7 !important;
+            box-shadow: 0 0 16px rgba(168, 85, 247, 0.25) !important;
+        }
+
+        .day-badge-highlight {
+            font-size: 10px;
+            font-weight: 800;
+            padding: 2px 8px;
+            border-radius: 8px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .day-badge-highlight.today {
+            background: #3b82f6;
+            color: #ffffff;
+            box-shadow: 0 2px 8px rgba(59, 130, 246, 0.5);
+        }
+
+        .day-badge-highlight.tomorrow {
+            background: #a855f7;
+            color: #ffffff;
+            box-shadow: 0 2px 8px rgba(168, 85, 247, 0.5);
         }
 
         .day-header {
@@ -140,6 +174,12 @@
             display: flex;
             flex-direction: column;
             gap: 2px;
+        }
+
+        .day-name-row {
+            display: flex;
+            align-items: center;
+            gap: 8px;
         }
 
         .day-name {
@@ -712,7 +752,6 @@
                 `;
             });
 
-        // Расчет времени окончания пары (85 минут)
         function calculateLessonEnd(startTimeStr) {
             const [h, m] = startTimeStr.split(':').map(Number);
             const totalMinutes = h * 60 + m + 85;
@@ -721,8 +760,8 @@
             return `${String(endH).padStart(2, '0')}:${String(endM).padStart(2, '0')}`;
         }
 
-        // Перевод строки времени в минуты от начала дня для сравнения
         function timeToMinutes(timeStr) {
+            if (!timeStr) return 0;
             const [h, m] = timeStr.split(':').map(Number);
             return h * 60 + m;
         }
@@ -800,7 +839,6 @@
         }
         function closeEventModal() { document.getElementById('eventModal').classList.remove('open'); }
 
-        // Проверка конфликтов с расписанием БГУИР на выбранную дату
         function checkScheduleConflict() {
             const dateVal = document.getElementById('eventDateInput').value;
             const startVal = document.getElementById('eventStartTimeInput').value;
@@ -816,11 +854,10 @@
 
             const targetDate = new Date(dateVal);
             const weekNum = getWeekNumberForDate(targetDate);
-            const jsDay = targetDate.getDay(); // 0 - вс, 1 - пн ... 6 - сб
-            const dayIndex = jsDay === 0 ? 5 : jsDay - 1; // приведем к нашему индексу пн-сб
+            const jsDay = targetDate.getDay();
+            const dayIndex = jsDay === 0 ? 5 : jsDay - 1;
             
             if (jsDay === 0) {
-                // Воскресенье - пар нет
                 warningBox.style.display = 'none';
                 saveBtn.disabled = false;
                 return;
@@ -845,7 +882,6 @@
                 const lStartMin = timeToMinutes(l.time);
                 const lEndMin = timeToMinutes(l.endTime || calculateLessonEnd(l.time));
 
-                // Проверка пересечения временных интервалов
                 if (Math.max(eventStartMin, lStartMin) < Math.min(eventEndMin, lEndMin)) {
                     conflictLesson = l;
                     break;
@@ -856,7 +892,7 @@
                 document.getElementById('conflictLessonName').innerText = conflictLesson.title;
                 document.getElementById('conflictLessonTime').innerText = `${conflictLesson.time} - ${conflictLesson.endTime || calculateLessonEnd(conflictLesson.time)}`;
                 warningBox.style.display = 'block';
-                saveBtn.disabled = true; // Блокируем кнопку сохранения
+                saveBtn.disabled = true;
             } else {
                 warningBox.style.display = 'none';
                 saveBtn.disabled = false;
@@ -972,6 +1008,17 @@
             const day = String(dateObj.getDate()).padStart(2, '0');
             const dateKey = `${year}-${month}-${day}`;
 
+            // Определение «Сегодня» и «Завтра»
+            const now = new Date();
+            const todayKey = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`;
+            
+            const tomorrow = new Date();
+            tomorrow.setDate(now.getDate() + 1);
+            const tomorrowKey = `${tomorrow.getFullYear()}-${String(tomorrow.getMonth() + 1).padStart(2, '0')}-${String(tomorrow.getDate()).padStart(2, '0')}`;
+
+            const isToday = (dateKey === todayKey);
+            const isTomorrow = (dateKey === tomorrowKey);
+
             const dayCustomEvents = customEvents.filter(e => e.date === dateKey).map(e => ({
                 id: e.id,
                 title: e.title,
@@ -983,9 +1030,13 @@
                 isCustom: true
             }));
 
+            // Объединяем обычные пары и кастомные события
             const combinedLessons = [...lessons, ...dayCustomEvents];
             const filtered = filterLessons(combinedLessons);
             if (filtered.length === 0) return '';
+
+            // ⏱️ СОРТИРОВКА ВСЕХ СОБЫТИЙ ДНЯ ПО ВРЕМЕНИ НАЧАЛА
+            filtered.sort((a, b) => timeToMinutes(a.time) - timeToMinutes(b.time));
 
             const total = filtered.length;
             const activeCount = filtered.filter(l => {
@@ -997,11 +1048,19 @@
 
             const exactDateStr = dateObj.toLocaleDateString('ru-RU', { day: 'numeric', month: 'long', weekday: 'short' });
 
+            let cardClass = "day-card";
+            if (isToday) cardClass += " is-today";
+            else if (isTomorrow) cardClass += " is-tomorrow";
+
             return `
-            <div class="day-card">
+            <div class="${cardClass}">
                 <div class="day-header">
                     <div class="day-title">
-                        <span class="day-name">📅 ${dayName}</span>
+                        <div class="day-name-row">
+                            <span class="day-name">📅 ${dayName}</span>
+                            ${isToday ? '<span class="day-badge-highlight today">Сегодня</span>' : ''}
+                            ${isTomorrow ? '<span class="day-badge-highlight tomorrow">Завтра</span>' : ''}
+                        </div>
                         <span class="day-date">${exactDateStr}</span>
                     </div>
                     <div class="day-count">${activeCount}/${total} зап.</div>
