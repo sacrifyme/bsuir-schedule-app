@@ -574,7 +574,6 @@
 
         const semesterStart = new Date(2026, 9, 26);
         const semesterEnd = new Date(2026, 11, 21);
-        const dayMapping = { "Понедельник": 0, "Вторник": 1, "Среда": 2, "Четверг": 3, "Пятница": 4, "Суббота": 5 };
 
         const jsonUrl = window.location.href.includes('github.io') ? './schedule.json' : 'schedule.json';
 
@@ -596,9 +595,10 @@
                 `;
             });
 
+        // Точный расчет конца пары (1 час 25 минут = 85 минут)
         function calculateLessonEnd(startTimeStr) {
             const [h, m] = startTimeStr.split(':').map(Number);
-            const totalMinutes = h * 60 + m + 85; // Пара 1 час 25 минут
+            const totalMinutes = h * 60 + m + 85;
             const endH = Math.floor(totalMinutes / 60) % 24;
             const endM = totalMinutes % 60;
             return `${String(endH).padStart(2, '0')}:${String(endM).padStart(2, '0')}`;
@@ -726,6 +726,15 @@
             return lessons.filter(l => l.subgroup === 0 || l.subgroup === currentSubgroup);
         }
 
+        // Определение номера недели (1, 2, 3, 4) по календарной дате от начала семестра
+        function getWeekNumberForDate(targetDate) {
+            const diffTime = targetDate.getTime() - semesterStart.getTime();
+            const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
+            if (diffDays < 0) return 1;
+            const diffWeeks = Math.floor(diffDays / 7);
+            return (diffWeeks % 4) + 1;
+        }
+
         function renderDayCard(dayName, dateObj, lessons) {
             const filtered = filterLessons(lessons);
             if (filtered.length === 0) return '';
@@ -781,7 +790,7 @@
             `;
         }
 
-        // 📋 ГЕНЕРАЦИЯ ГРАФИКА РАБОТЫ (отталкиваемся от КОНЦА пары + время на дорогу)
+        // 📋 ГЕНЕРАЦИЯ ГРАФИКА РАБОТЫ (строго по календарным датам и правильной неделе из JSON)
         function generateWorkSchedule() {
             let currDate = new Date(semesterStart);
             const dayOfWeek = currDate.getDay();
@@ -789,10 +798,10 @@
             currDate.setDate(diffToMonday);
 
             let daySchedules = [];
-            let weekCounter = 1;
 
             while (currDate <= semesterEnd) {
-                const currentCalcWeek = ((weekCounter - 1) % 4) + 1;
+                // Определяем какая учебная неделя (1, 2, 3 или 4) соответствует этой дате
+                const currentCalcWeek = getWeekNumberForDate(currDate);
                 const weekDaysData = scheduleData[currentCalcWeek] || [];
                 
                 const weekMap = {};
@@ -857,7 +866,6 @@
                 });
 
                 currDate.setDate(currDate.getDate() + 7);
-                weekCounter++;
             }
 
             let shiftsText = daySchedules.map(item => {
@@ -903,11 +911,10 @@
                 const diffToMonday = currDate.getDate() - dayOfWeek + (dayOfWeek === 0 ? -6 : 1);
                 currDate.setDate(diffToMonday);
 
-                let weekCounter = 1;
                 let monthHasContent = false;
 
                 while (currDate <= semesterEnd) {
-                    const currentCalcWeek = ((weekCounter - 1) % 4) + 1;
+                    const currentCalcWeek = getWeekNumberForDate(currDate);
                     const weekDaysData = scheduleData[currentCalcWeek] || [];
                     
                     const weekMap = {};
@@ -932,7 +939,6 @@
 
                     if (weekHtml) html += weekHtml;
                     currDate.setDate(currDate.getDate() + 7);
-                    weekCounter++;
                 }
 
                 container.innerHTML = monthHasContent ? html : `<div class="empty-state">🎉 В этом месяце пар нет!</div>`;
