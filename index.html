@@ -27,6 +27,10 @@
             --lr-card-bg: linear-gradient(135deg, rgba(245, 158, 11, 0.25) 0%, rgba(217, 119, 6, 0.15) 100%);
             --lr-border: rgba(251, 191, 36, 0.4);
             --lr-color: #fbbf24;
+
+            --custom-card-bg: linear-gradient(135deg, rgba(168, 85, 247, 0.25) 0%, rgba(126, 34, 206, 0.15) 100%);
+            --custom-border: rgba(192, 132, 252, 0.4);
+            --custom-color: #c084fc;
         }
 
         * {
@@ -67,7 +71,12 @@
             margin: 2px 0 0 0;
         }
 
-        .settings-btn {
+        .header-btns {
+            display: flex;
+            gap: 8px;
+        }
+
+        .settings-btn, .add-event-btn {
             background: var(--card-bg);
             border: 1px solid var(--border-color);
             color: var(--text-color);
@@ -82,7 +91,13 @@
             transition: all 0.2s ease;
         }
 
-        .settings-btn:active {
+        .add-event-btn {
+            background: rgba(168, 85, 247, 0.2);
+            border-color: rgba(192, 132, 252, 0.4);
+            color: #e9d5ff;
+        }
+
+        .settings-btn:active, .add-event-btn:active {
             transform: scale(0.95);
         }
 
@@ -160,6 +175,7 @@
             padding: 12px;
             border-radius: 14px;
             transition: all 0.2s ease;
+            position: relative;
         }
 
         .lesson-card.card-lk {
@@ -175,6 +191,11 @@
         .lesson-card.card-lr {
             background: var(--lr-card-bg);
             border: 1px solid var(--lr-border);
+        }
+
+        .lesson-card.card-custom {
+            background: var(--custom-card-bg);
+            border: 1px solid var(--custom-border);
         }
 
         .lesson-card.skipped {
@@ -238,8 +259,24 @@
         .tag-lk { background: rgba(16, 185, 129, 0.3); color: #6ee7b7; }
         .tag-pz { background: rgba(239, 68, 68, 0.3); color: #fca5a5; }
         .tag-lr { background: rgba(245, 158, 11, 0.3); color: #fde047; }
+        .tag-custom { background: rgba(168, 85, 247, 0.3); color: #e9d5ff; }
         .tag-subgroup { background: rgba(168, 85, 247, 0.25); color: #e9d5ff; }
         .tag-skip { background: rgba(255, 255, 255, 0.15); color: var(--hint-color); border: 1px solid rgba(255, 255, 255, 0.2); }
+
+        .delete-event-btn {
+            background: none;
+            border: none;
+            color: rgba(255, 255, 255, 0.4);
+            font-size: 14px;
+            cursor: pointer;
+            padding: 2px 6px;
+            border-radius: 4px;
+            margin-left: auto;
+            transition: color 0.2s;
+        }
+        .delete-event-btn:hover {
+            color: #ef4444;
+        }
 
         .lesson-meta {
             display: flex;
@@ -278,7 +315,18 @@
             border: 1px dashed var(--border-color);
         }
 
-        /* МОДАЛЬНОЕ ОКНО НАСТРОЕК */
+        .conflict-warning {
+            background: rgba(239, 68, 68, 0.2);
+            border: 1px solid rgba(248, 113, 113, 0.4);
+            color: #fca5a5;
+            padding: 10px;
+            border-radius: 10px;
+            font-size: 12px;
+            margin-bottom: 12px;
+            display: none;
+        }
+
+        /* МОДАЛЬНЫЕ ОКНА */
         .modal-overlay {
             position: fixed;
             top: 0; left: 0; right: 0; bottom: 0;
@@ -347,6 +395,19 @@
             margin-bottom: 8px;
             text-transform: uppercase;
             letter-spacing: 0.5px;
+        }
+
+        .settings-section input[type="text"],
+        .settings-section input[type="date"],
+        .settings-section input[type="time"] {
+            width: 100%;
+            background: rgba(0, 0, 0, 0.25);
+            border: 1px solid var(--border-color);
+            padding: 12px;
+            border-radius: 12px;
+            color: var(--text-color);
+            font-size: 14px;
+            font-family: inherit;
         }
 
         .subgroup-switch, .mode-switch {
@@ -466,6 +527,12 @@
             margin-top: 10px;
             box-shadow: 0 4px 14px rgba(59, 130, 246, 0.35);
         }
+        .save-settings-btn:disabled {
+            background: #475569;
+            opacity: 0.5;
+            cursor: not-allowed;
+            box-shadow: none;
+        }
     </style>
 </head>
 <body>
@@ -475,15 +542,58 @@
             <h1>Расписание БГУИР</h1>
             <p id="current-mode-label">Загрузка...</p>
         </div>
-        <button class="settings-btn" onclick="openModal()">
-            ⚙️ Настройки
-        </button>
+        <div class="header-btns">
+            <button class="add-event-btn" onclick="openEventModal()">+ Событие</button>
+            <button class="settings-btn" onclick="openModal()">⚙️</button>
+        </div>
     </header>
 
     <div class="active-filters-info" id="active-filters-info"></div>
 
     <div id="schedule-container">
         <div class="empty-state">⏳ Загрузка расписания...</div>
+    </div>
+
+    <!-- МОДАЛЬНОЕ ОКНО ДОБАВЛЕНИЯ СОБЫТИЯ С КАЛЕНДАРЕМ И ПРОВЕРКОЙ ПАР -->
+    <div class="modal-overlay" id="eventModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>✨ Добавить событие</h2>
+                <button class="close-modal-btn" onclick="closeEventModal()">✕</button>
+            </div>
+
+            <div class="conflict-warning" id="conflictWarning">
+                ⚠️ <b>Внимание!</b> В это время у вас стоит пара: <span id="conflictLessonName"></span> (<span id="conflictLessonTime"></span>)
+            </div>
+
+            <div class="settings-section">
+                <label>Название</label>
+                <input type="text" id="eventNameInput" placeholder="Например: Тренировка / Репетиция">
+            </div>
+
+            <div class="settings-section">
+                <label>📅 Выбор даты из календаря</label>
+                <input type="date" id="eventDateInput" onchange="checkScheduleConflict()">
+            </div>
+
+            <div class="settings-section" style="display: flex; gap: 12px;">
+                <div style="flex: 1;">
+                    <label>Начало</label>
+                    <input type="time" id="eventStartTimeInput" value="18:00" onchange="checkScheduleConflict()">
+                </div>
+                <div style="flex: 1;">
+                    <label>Конец</label>
+                    <input type="time" id="eventEndTimeInput" value="19:30" onchange="checkScheduleConflict()">
+                </div>
+            </div>
+
+            <div class="settings-section">
+                <label>Место / Аудитория (необязательно)</label>
+                <input type="text" id="eventRoomInput" placeholder="Например: зал / дом / студия">
+            </div>
+
+            <button class="save-settings-btn" id="saveEventBtn" onclick="saveCustomEvent()">Добавить в расписание</button>
+        </div>
     </div>
 
     <!-- МОДАЛЬНОЕ ОКНО НАСТРОЕК -->
@@ -570,11 +680,13 @@
         let scheduleData = {};
         
         let skippedSubjects = new Set(JSON.parse(localStorage.getItem('skipped_subjects') || '[]'));
+        let customEvents = JSON.parse(localStorage.getItem('custom_events') || '[]');
         let categorizedSubjects = { LK: [], PZ: [], LR: [] };
 
         const semesterStart = new Date(2026, 9, 26);
         const semesterEnd = new Date(2026, 11, 21);
         const dayMapping = { "Понедельник": 0, "Вторник": 1, "Среда": 2, "Четверг": 3, "Пятница": 4, "Суббота": 5 };
+        const dayNamesOrder = ["Понедельник", "Вторник", "Среда", "Четверг", "Пятница", "Суббота"];
 
         // Надежная загрузка JSON с защитой от кэширования
         const jsonUrl = './schedule.json';
@@ -607,6 +719,12 @@
             const endH = Math.floor(totalMinutes / 60) % 24;
             const endM = totalMinutes % 60;
             return `${String(endH).padStart(2, '0')}:${String(endM).padStart(2, '0')}`;
+        }
+
+        // Перевод строки времени в минуты от начала дня для сравнения
+        function timeToMinutes(timeStr) {
+            const [h, m] = timeStr.split(':').map(Number);
+            return h * 60 + m;
         }
 
         function extractCategorizedSubjects() {
@@ -674,6 +792,115 @@
         function openModal() { document.getElementById('settingsModal').classList.add('open'); }
         function closeModal() { document.getElementById('settingsModal').classList.remove('open'); }
 
+        function openEventModal() {
+            const todayStr = new Date().toISOString().split('T')[0];
+            document.getElementById('eventDateInput').value = todayStr;
+            document.getElementById('eventModal').classList.add('open');
+            checkScheduleConflict();
+        }
+        function closeEventModal() { document.getElementById('eventModal').classList.remove('open'); }
+
+        // Проверка конфликтов с расписанием БГУИР на выбранную дату
+        function checkScheduleConflict() {
+            const dateVal = document.getElementById('eventDateInput').value;
+            const startVal = document.getElementById('eventStartTimeInput').value;
+            const endVal = document.getElementById('eventEndTimeInput').value;
+            const warningBox = document.getElementById('conflictWarning');
+            const saveBtn = document.getElementById('saveEventBtn');
+
+            if (!dateVal || !startVal || !endVal) {
+                warningBox.style.display = 'none';
+                saveBtn.disabled = false;
+                return;
+            }
+
+            const targetDate = new Date(dateVal);
+            const weekNum = getWeekNumberForDate(targetDate);
+            const jsDay = targetDate.getDay(); // 0 - вс, 1 - пн ... 6 - сб
+            const dayIndex = jsDay === 0 ? 5 : jsDay - 1; // приведем к нашему индексу пн-сб
+            
+            if (jsDay === 0) {
+                // Воскресенье - пар нет
+                warningBox.style.display = 'none';
+                saveBtn.disabled = false;
+                return;
+            }
+
+            const dayName = dayNamesOrder[dayIndex];
+            const weekDaysData = scheduleData[weekNum] || [];
+            const dayData = weekDaysData.find(d => d.day === dayName);
+
+            if (!dayData || !dayData.lessons) {
+                warningBox.style.display = 'none';
+                saveBtn.disabled = false;
+                return;
+            }
+
+            const eventStartMin = timeToMinutes(startVal);
+            const eventEndMin = timeToMinutes(endVal);
+
+            let conflictLesson = null;
+
+            for (let l of dayData.lessons) {
+                const lStartMin = timeToMinutes(l.time);
+                const lEndMin = timeToMinutes(l.endTime || calculateLessonEnd(l.time));
+
+                // Проверка пересечения временных интервалов
+                if (Math.max(eventStartMin, lStartMin) < Math.min(eventEndMin, lEndMin)) {
+                    conflictLesson = l;
+                    break;
+                }
+            }
+
+            if (conflictLesson) {
+                document.getElementById('conflictLessonName').innerText = conflictLesson.title;
+                document.getElementById('conflictLessonTime').innerText = `${conflictLesson.time} - ${conflictLesson.endTime || calculateLessonEnd(conflictLesson.time)}`;
+                warningBox.style.display = 'block';
+                saveBtn.disabled = true; // Блокируем кнопку сохранения
+            } else {
+                warningBox.style.display = 'none';
+                saveBtn.disabled = false;
+            }
+        }
+
+        function saveCustomEvent() {
+            const title = document.getElementById('eventNameInput').value.trim();
+            const date = document.getElementById('eventDateInput').value;
+            const startTime = document.getElementById('eventStartTimeInput').value;
+            const endTime = document.getElementById('eventEndTimeInput').value;
+            const room = document.getElementById('eventRoomInput').value.trim();
+
+            if (!title || !date || !startTime || !endTime) {
+                alert("Заполните название, дату и время события!");
+                return;
+            }
+
+            const newEvent = {
+                id: 'custom_' + Date.now(),
+                title: title,
+                date: date,
+                time: startTime,
+                endTime: endTime,
+                room: room,
+                type: 'ДЕЛО',
+                subgroup: 0
+            };
+
+            customEvents.push(newEvent);
+            localStorage.setItem('custom_events', JSON.stringify(customEvents));
+
+            document.getElementById('eventNameInput').value = '';
+            document.getElementById('eventRoomInput').value = '';
+            closeEventModal();
+            renderSchedule();
+        }
+
+        function deleteCustomEvent(id) {
+            customEvents = customEvents.filter(e => e.id !== id);
+            localStorage.setItem('custom_events', JSON.stringify(customEvents));
+            renderSchedule();
+        }
+
         function setSubgroup(sg) {
             currentSubgroup = sg;
             document.getElementById('sg-all').classList.toggle('active', sg === 0);
@@ -740,11 +967,29 @@
         }
 
         function renderDayCard(dayName, dateObj, lessons) {
-            const filtered = filterLessons(lessons);
+            const year = dateObj.getFullYear();
+            const month = String(dateObj.getMonth() + 1).padStart(2, '0');
+            const day = String(dateObj.getDate()).padStart(2, '0');
+            const dateKey = `${year}-${month}-${day}`;
+
+            const dayCustomEvents = customEvents.filter(e => e.date === dateKey).map(e => ({
+                id: e.id,
+                title: e.title,
+                time: e.time,
+                endTime: e.endTime,
+                room: e.room,
+                type: e.type,
+                subgroup: 0,
+                isCustom: true
+            }));
+
+            const combinedLessons = [...lessons, ...dayCustomEvents];
+            const filtered = filterLessons(combinedLessons);
             if (filtered.length === 0) return '';
 
             const total = filtered.length;
             const activeCount = filtered.filter(l => {
+                if (l.isCustom) return true;
                 const rawType = (l.type || '').toUpperCase();
                 let targetKey = rawType.includes('ЛК') ? 'LK' : (rawType.includes('PZ') || rawType.includes('ПЗ') ? 'PZ' : 'LR');
                 return !skippedSubjects.has(`${l.title} (${targetKey})`);
@@ -759,15 +1004,36 @@
                         <span class="day-name">📅 ${dayName}</span>
                         <span class="day-date">${exactDateStr}</span>
                     </div>
-                    <div class="day-count">${activeCount}/${total} пар</div>
+                    <div class="day-count">${activeCount}/${total} зап.</div>
                 </div>
                 <div class="lesson-list">
                     ${filtered.map(l => {
+                        if (l.isCustom) {
+                            return `
+                            <div class="lesson-card card-custom">
+                                <div class="lesson-time-box">
+                                    <span class="lesson-time-start">${l.time}</span>
+                                    <span class="lesson-time-end">➔ ${l.endTime}</span>
+                                </div>
+                                <div class="lesson-info">
+                                    <div class="lesson-top-row">
+                                        <span class="lesson-title">${l.title}</span>
+                                        <span class="tag tag-custom">${l.type}</span>
+                                        <button class="delete-event-btn" onclick="deleteCustomEvent('${l.id}')" title="Удалить">🗑️</button>
+                                    </div>
+                                    <div class="lesson-meta">
+                                        ${l.room ? `<span>📍 ${l.room}</span>` : ''}
+                                    </div>
+                                </div>
+                            </div>
+                            `;
+                        }
+
                         const rawType = (l.type || '').toUpperCase();
                         let targetKey = rawType.includes('ЛК') ? 'LK' : (rawType.includes('PZ') || rawType.includes('ПЗ') ? 'PZ' : 'LR');
                         const subjectKey = `${l.title} (${targetKey})`;
                         const isSkipped = skippedSubjects.has(subjectKey);
-                        const endTime = calculateLessonEnd(l.time);
+                        const endTime = l.endTime || calculateLessonEnd(l.time);
 
                         return `
                         <div class="lesson-card card-${targetKey.toLowerCase()} ${isSkipped ? 'skipped' : ''}">
@@ -810,8 +1076,6 @@
                 const weekMap = {};
                 weekDaysData.forEach(d => { weekMap[d.day] = d.lessons; });
 
-                const dayNamesOrder = ["Понедельник", "Вторник", "Среда", "Четверг", "Пятница", "Суббота"];
-
                 dayNamesOrder.forEach((dayName, idx) => {
                     let lessonDate = new Date(currDate);
                     lessonDate.setDate(currDate.getDate() + idx);
@@ -840,10 +1104,6 @@
                                 }
                             });
 
-                            // Точная привязка работы под время окончания пар:
-                            // 16:55 (окончание) -> работа с 18
-                            // 18:30 (окончание) -> работа с 19
-                            // 20:25 (окончание) -> работа с 21
                             if (latestEndHour <= 17) {
                                 workStart = 18;
                             } else if (latestEndHour <= 18.5) {
@@ -934,7 +1194,6 @@
                     const weekMap = {};
                     weekDaysData.forEach(d => { weekMap[d.day] = d.lessons; });
 
-                    const dayNamesOrder = ["Понедельник", "Вторник", "Среда", "Четверг", "Пятница", "Суббота"];
                     let weekHtml = '';
 
                     dayNamesOrder.forEach((dayName, idx) => {
