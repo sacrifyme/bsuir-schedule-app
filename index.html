@@ -83,7 +83,7 @@
             transform: scale(0.95);
         }
 
-        /* Панель активных фильтров на главном экране */
+        /* Панель активных фильтров */
         .active-filters-info {
             display: flex;
             gap: 6px;
@@ -264,7 +264,6 @@
             display: none;
             align-items: flex-end;
             z-index: 1000;
-            transition: opacity 0.3s ease;
         }
 
         .modal-overlay.open {
@@ -327,7 +326,6 @@
             letter-spacing: 0.5px;
         }
 
-        /* Переключатели внутри модалки */
         .subgroup-switch, .mode-switch {
             display: flex;
             background: rgba(0, 0, 0, 0.25);
@@ -356,12 +354,12 @@
             color: var(--button-text);
         }
 
-        /* Список выбора пропусков в настройках */
+        /* Список предметов для пропусков */
         .skip-list-container {
             display: flex;
             flex-direction: column;
             gap: 8px;
-            max-height: 250px;
+            max-height: 220px;
             overflow-y: auto;
             padding-right: 4px;
         }
@@ -400,7 +398,6 @@
 </head>
 <body>
 
-    <!-- Шапка главного меню -->
     <header>
         <div class="header-title">
             <h1>Расписание БГУИР</h1>
@@ -411,10 +408,8 @@
         </button>
     </header>
 
-    <!-- Информационная плашка выбранных фильтров -->
     <div class="active-filters-info" id="active-filters-info"></div>
 
-    <!-- Контейнер для отображения расписания -->
     <div id="schedule-container">
         <div class="empty-state">⏳ Загрузка расписания...</div>
     </div>
@@ -427,7 +422,6 @@
                 <button class="close-modal-btn" onclick="closeModal()">✕</button>
             </div>
 
-            <!-- 1. Выбор подгруппы -->
             <div class="settings-section">
                 <label>Подгруппа</label>
                 <div class="subgroup-switch">
@@ -437,7 +431,6 @@
                 </div>
             </div>
 
-            <!-- 2. Режим отображения -->
             <div class="settings-section">
                 <label>Режим просмотра</label>
                 <div class="mode-switch">
@@ -446,7 +439,6 @@
                 </div>
             </div>
 
-            <!-- Выбор недели (если выбран режим "Одна неделя") -->
             <div class="settings-section" id="week-select-section">
                 <label>Активная учебная неделя</label>
                 <div class="subgroup-switch">
@@ -457,11 +449,10 @@
                 </div>
             </div>
 
-            <!-- 3. Управление пропусками -->
             <div class="settings-section">
-                <label>Отметить пропуски</label>
+                <label>Предметы для пропуска (автоматически на всех неделях)</label>
                 <div class="skip-list-container" id="skip-list-container">
-                    <!-- Заполняется динамически уникальными предметами -->
+                    <!-- Заполняется уникальными предметами -->
                 </div>
             </div>
 
@@ -475,14 +466,13 @@
 
         let currentWeek = 1;
         let viewMode = 'single';
-        let currentSubgroup = 0; // 0 = Все, 1 = 1п, 2 = 2п
+        let currentSubgroup = 0;
         let scheduleData = {};
-        let allUniqueLessons = []; // Список всех уникальных пар для меню пропусков
+        let uniqueSubjects = []; // Список уникальных предметов (например, "ОС (ЛК)")
         
-        // Хранилище пропусков в localStorage
-        let skippedLessons = new Set(JSON.parse(localStorage.getItem('skipped_lessons') || '[]'));
+        // Хранилище пропущенных предметов в localStorage
+        let skippedSubjects = new Set(JSON.parse(localStorage.getItem('skipped_subjects') || '[]'));
 
-        // 📅 Понедельник первой учебной недели
         const semesterStart = new Date(2026, 9, 26);
 
         const dayMapping = {
@@ -494,42 +484,41 @@
             const totalDaysOffset = (weekNum - 1) * 7 + dayOffset;
             const lessonDate = new Date(semesterStart);
             lessonDate.setDate(semesterStart.getDate() + totalDaysOffset);
-            
-            return lessonDate.toLocaleDateString('ru-RU', {
-                day: 'numeric', month: 'long', weekday: 'short'
-            });
+            return lessonDate.toLocaleDateString('ru-RU', { day: 'numeric', month: 'long', weekday: 'short' });
         }
 
-        // Загрузка schedule.json
-        fetch('schedule.json')
+        const jsonUrl = window.location.href.includes('github.io') ? './schedule.json' : 'schedule.json';
+
+        fetch(jsonUrl)
             .then(response => {
                 if (!response.ok) throw new Error('schedule.json не найден');
                 return response.json();
             })
             .then(data => {
                 scheduleData = data;
-                extractUniqueLessons();
+                extractUniqueSubjects();
                 renderSchedule();
                 updateHeaderInfo();
             })
             .catch(err => {
                 console.error(err);
                 document.getElementById('schedule-container').innerHTML = `
-                    <div class="empty-state">⚠️ Ошибка загрузки schedule.json. Убедитесь, что файл добавлен в репозиторий GitHub.</div>
+                    <div class="empty-state">⚠️ Ошибка загрузки schedule.json. Проверьте репозиторий GitHub.</div>
                 `;
             });
 
-        // Сбор всех уникальных занятий для настройки пропусков в модалке
-        function extractUniqueLessons() {
-            allUniqueLessons = [];
+        // Сбор уникальных пар (Название + Тип, например "ОС (ЛК)")
+        function extractUniqueSubjects() {
             const seen = new Set();
+            uniqueSubjects = [];
             for (let w = 1; w <= 4; w++) {
                 if (!scheduleData[w]) continue;
                 scheduleData[w].forEach(d => {
                     d.lessons.forEach(l => {
-                        if (!seen.has(l.id)) {
-                            seen.add(l.id);
-                            allUniqueLessons.push(l);
+                        const subjectKey = `${l.title} (${l.type})`;
+                        if (!seen.has(subjectKey)) {
+                            seen.add(subjectKey);
+                            uniqueSubjects.push({ key: subjectKey, title: l.title, type: l.type });
                         }
                     });
                 });
@@ -539,43 +528,37 @@
 
         function renderSkipList() {
             const container = document.getElementById('skip-list-container');
-            if (allUniqueLessons.length === 0) {
-                container.innerHTML = `<div style="font-size:12px; color:var(--hint-color); text-align:center;">Нет доступных пар</div>`;
+            if (uniqueSubjects.length === 0) {
+                container.innerHTML = `<div style="font-size:12px; color:var(--hint-color); text-align:center;">Нет предметов</div>`;
                 return;
             }
 
-            container.innerHTML = allUniqueLessons.map(l => {
-                const isChecked = skippedLessons.has(l.id);
+            container.innerHTML = uniqueSubjects.map(sub => {
+                const isChecked = skippedSubjects.has(sub.key);
                 return `
                     <div class="skip-item">
                         <div>
-                            <strong>${l.title}</strong> (${l.type})<br>
-                            <span style="font-size:11px; color:var(--hint-color);">${l.time} • Неделя ${l.id.split('_')[0].replace('w','')}</span>
+                            <strong>${sub.title}</strong> <span class="tag tag-${sub.type.toLowerCase()}">${sub.type}</span>
                         </div>
-                        <input type="checkbox" ${isChecked ? 'checked' : ''} onchange="toggleSkipModal('${l.id}')">
+                        <input type="checkbox" ${isChecked ? 'checked' : ''} onchange="toggleSubjectSkip('${sub.key}')">
                     </div>
                 `;
             }).join('');
         }
 
-        function toggleSkipModal(lessonId) {
-            if (skippedLessons.has(lessonId)) {
-                skippedLessons.delete(lessonId);
+        function toggleSubjectSkip(subjectKey) {
+            if (skippedSubjects.has(subjectKey)) {
+                skippedSubjects.delete(subjectKey);
             } else {
-                skippedLessons.add(lessonId);
+                skippedSubjects.add(subjectKey);
             }
-            localStorage.setItem('skipped_lessons', JSON.stringify(Array.from(skippedLessons)));
+            localStorage.setItem('skipped_subjects', JSON.stringify(Array.from(skippedSubjects)));
             renderSchedule();
+            updateHeaderInfo();
         }
 
-        // Управление модальным окном
-        function openModal() {
-            document.getElementById('settingsModal').classList.add('open');
-        }
-
-        function closeModal() {
-            document.getElementById('settingsModal').classList.remove('open');
-        }
+        function openModal() { document.getElementById('settingsModal').classList.add('open'); }
+        function closeModal() { document.getElementById('settingsModal').classList.remove('open'); }
 
         function setSubgroup(sg) {
             currentSubgroup = sg;
@@ -609,12 +592,10 @@
             const sgText = currentSubgroup === 0 ? 'Все подгруппы' : `${currentSubgroup} подгруппа`;
             
             document.getElementById('current-mode-label').innerText = `${modeText} • ${sgText}`;
-
-            // Информационные плашки под шапкой
             document.getElementById('active-filters-info').innerHTML = `
                 <span class="badge-info">📌 ${modeText}</span>
                 <span class="badge-info">👥 ${sgText}</span>
-                <span class="badge-info">👁️‍🗨️ Пропусков: ${skippedLessons.size}</span>
+                <span class="badge-info">👁️‍🗨️ Пропускаемых предметов: ${skippedSubjects.size}</span>
             `;
         }
 
@@ -624,9 +605,7 @@
         }
 
         function buildWeekHtml(weekNum, days) {
-            if (!days || days.length === 0) {
-                return `<div class="empty-state">🎉 На этой неделе пар нет!</div>`;
-            }
+            if (!days || days.length === 0) return `<div class="empty-state">🎉 На этой неделе пар нет!</div>`;
 
             let weekHasLessons = false;
             let html = days.map(d => {
@@ -635,7 +614,7 @@
                 
                 weekHasLessons = true;
                 const total = filtered.length;
-                const activeCount = filtered.filter(l => !skippedLessons.has(l.id)).length;
+                const activeCount = filtered.filter(l => !skippedSubjects.has(`${l.title} (${l.type})`)).length;
                 const exactDate = getDateForLesson(weekNum, d.day);
                 
                 return `
@@ -649,7 +628,8 @@
                     </div>
                     <div class="lesson-list">
                         ${filtered.map(l => {
-                            const isSkipped = skippedLessons.has(l.id);
+                            const subjectKey = `${l.title} (${l.type})`;
+                            const isSkipped = skippedSubjects.has(subjectKey);
                             return `
                             <div class="lesson-card ${isSkipped ? 'skipped' : ''}">
                                 <div class="lesson-time-box">
@@ -678,16 +658,13 @@
 
         function renderSchedule() {
             const container = document.getElementById('schedule-container');
-
             if (viewMode === 'single') {
-                const days = scheduleData[currentWeek] || [];
-                container.innerHTML = buildWeekHtml(currentWeek, days);
+                container.innerHTML = buildWeekHtml(currentWeek, scheduleData[currentWeek] || []);
             } else {
                 let html = '';
                 for (let w = 1; w <= 4; w++) {
-                    const days = scheduleData[w] || [];
                     html += `<div class="week-banner">📌 Учебная неделя №${w}</div>`;
-                    html += buildWeekHtml(w, days);
+                    html += buildWeekHtml(w, scheduleData[w] || []);
                 }
                 container.innerHTML = html;
             }
