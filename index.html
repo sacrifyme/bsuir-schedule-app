@@ -559,7 +559,7 @@
         </div>
     </div>
 
-<script>
+    <script>
         const tg = window.Telegram.WebApp;
         tg.expand();
 
@@ -598,7 +598,7 @@
 
         function calculateLessonEnd(startTimeStr) {
             const [h, m] = startTimeStr.split(':').map(Number);
-            const totalMinutes = h * 60 + m + 85;
+            const totalMinutes = h * 60 + m + 85; // Пара 1 час 25 минут
             const endH = Math.floor(totalMinutes / 60) % 24;
             const endM = totalMinutes % 60;
             return `${String(endH).padStart(2, '0')}:${String(endM).padStart(2, '0')}`;
@@ -726,7 +726,6 @@
             return lessons.filter(l => l.subgroup === 0 || l.subgroup === currentSubgroup);
         }
 
-        // Рендеринг карточки конкретного дня
         function renderDayCard(dayName, dateObj, lessons) {
             const filtered = filterLessons(lessons);
             if (filtered.length === 0) return '';
@@ -782,10 +781,9 @@
             `;
         }
 
-        // 📋 ГЕНЕРАЦИЯ ГРАФИКА РАБОТЫ (помесячно, строго по датам)
+        // 📋 ГЕНЕРАЦИЯ ГРАФИКА РАБОТЫ (отталкиваемся от КОНЦА пары + время на дорогу)
         function generateWorkSchedule() {
             let currDate = new Date(semesterStart);
-            // Приводим к понедельнику текущей недели начала
             const dayOfWeek = currDate.getDay();
             const diffToMonday = currDate.getDate() - dayOfWeek + (dayOfWeek === 0 ? -6 : 1);
             currDate.setDate(diffToMonday);
@@ -797,7 +795,6 @@
                 const currentCalcWeek = ((weekCounter - 1) % 4) + 1;
                 const weekDaysData = scheduleData[currentCalcWeek] || [];
                 
-                // Создаем карту дней недели для текущей недели из JSON
                 const weekMap = {};
                 weekDaysData.forEach(d => { weekMap[d.day] = d.lessons; });
 
@@ -885,16 +882,13 @@
             });
         }
 
-        // Главная функция рендеринга расписания
         function renderSchedule() {
             const container = document.getElementById('schedule-container');
 
             if (viewMode === 'single') {
-                // Режим одной недели
                 const days = scheduleData[currentWeek] || [];
                 let html = '';
                 days.forEach(d => {
-                    // Для режима одной недели берем примерную дату начала
                     const dayOffset = dayMapping[d.day] || 0;
                     const dummyDate = new Date(semesterStart);
                     dummyDate.setDate(semesterStart.getDate() + (currentWeek - 1) * 7 + dayOffset);
@@ -902,7 +896,6 @@
                 });
                 container.innerHTML = html || `<div class="empty-state">🎉 На этой неделе пар нет!</div>`;
             } else {
-                // Режим всего семестра по месяцам
                 let html = `<div class="month-banner">🗓️ Месяц: ${currentMonth === 10 ? 'Октябрь 2026' : currentMonth === 11 ? 'Ноябрь 2026' : 'Декабрь 2026'}</div>`;
                 
                 let currDate = new Date(semesterStart);
