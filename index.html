@@ -3,7 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>Расписание БГУИР с датами</title>
+    <title>Расписание БГУИР</title>
+    <!-- Telegram Web App SDK -->
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <style>
         :root {
@@ -304,7 +305,9 @@
         <div class="week-chip" onclick="selectWeek(4)">Неделя 4</div>
     </div>
 
-    <div id="schedule-container"></div>
+    <div id="schedule-container">
+        <div class="empty-state">⏳ Загрузка расписания...</div>
+    </div>
 
     <script>
         const tg = window.Telegram.WebApp;
@@ -312,9 +315,10 @@
 
         let currentWeek = 1;
         let viewMode = 'single';
+        let scheduleData = {};
 
-        // 📅 ЯКОРНАЯ ДАТА: Понедельник первой учебной недели семестра (можно изменить под свой семестр)
-        const semesterStart = new Date(2026, 9, 26); // 7 сентября 2026 (месяцы с 0: 8 = сентябрь)
+        // 📅 ТОЧКА ОТСЧЕТА: Понедельник первой учебной недели
+        const semesterStart = new Date(2026, 9, 26); // Измени под дату своего начала семестра (год, месяц с 0, число)
 
         const dayMapping = {
             "Понедельник": 0,
@@ -325,10 +329,8 @@
             "Суббота": 5
         };
 
-        // Функция точного расчета даты для конкретного дня конкретной недели
         function getDateForLesson(weekNum, dayName) {
             const dayOffset = dayMapping[dayName] || 0;
-            // Каждая неделя = (weekNum - 1) * 7 дней + смещение дня недели
             const totalDaysOffset = (weekNum - 1) * 7 + dayOffset;
             
             const lessonDate = new Date(semesterStart);
@@ -341,33 +343,22 @@
             });
         }
 
-        const mockSchedule = {
-            1: [
-                {
-                    day: "Четверг",
-                    lessons: [
-                        { time: "15:30", type: "ЛК", title: "САСиПМС", room: "112-3 к.", teacher: "Котухов А. В.", isSkipped: false },
-                        { time: "19:00", type: "ПЗ", title: "ПОМС", room: "404-1 к.", teacher: "Писарчик А. Ю.", isSkipped: true }
-                    ]
-                },
-                {
-                    day: "Пятница",
-                    lessons: [
-                        { time: "13:35", type: "ПЗ", title: "Физическая культура", room: "Спорткомплекс", teacher: "", isSkipped: false }
-                    ]
-                }
-            ],
-            2: [
-                {
-                    day: "Понедельник",
-                    lessons: [
-                        { time: "08:00", type: "ЛР", title: "ПОМС", room: "405-1 к.", teacher: "Писарчик А. Ю.", isSkipped: false }
-                    ]
-                }
-            ],
-            3: [],
-            4: []
-        };
+        // Загружаем schedule.json с GitHub Pages
+        fetch('schedule.json')
+            .then(response => {
+                if (!response.ok) throw new Error('Файл schedule.json не найден');
+                return response.json();
+            })
+            .then(data => {
+                scheduleData = data;
+                renderSchedule();
+            })
+            .catch(err => {
+                console.error(err);
+                document.getElementById('schedule-container').innerHTML = `
+                    <div class="empty-state">⚠️ Не удалось загрузить расписание. Убедитесь, что файл schedule.json добавлен в репозиторий.</div>
+                `;
+            });
 
         function setMode(mode) {
             viewMode = mode;
@@ -393,7 +384,7 @@
             return days.map(d => {
                 const total = d.lessons.length;
                 const skippedCount = d.lessons.filter(l => l.isSkipped).length;
-                const exactDate = getDateForLesson(weekNum, d.day); // Вычисляем дату для этой недели и дня
+                const exactDate = getDateForLesson(weekNum, d.day);
                 
                 return `
                 <div class="day-card">
@@ -432,20 +423,18 @@
             const container = document.getElementById('schedule-container');
 
             if (viewMode === 'single') {
-                const days = mockSchedule[currentWeek] || [];
+                const days = scheduleData[currentWeek] || [];
                 container.innerHTML = buildWeekHtml(currentWeek, days);
             } else {
                 let html = '';
                 for (let w = 1; w <= 4; w++) {
-                    const days = mockSchedule[w] || [];
+                    const days = scheduleData[w] || [];
                     html += `<div class="week-banner">📌 Учебная неделя №${w}</div>`;
                     html += buildWeekHtml(w, days);
                 }
                 container.innerHTML = html;
             }
         }
-
-        renderSchedule();
     </script>
 </body>
 </html>
