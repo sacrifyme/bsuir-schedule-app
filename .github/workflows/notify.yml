@@ -1,0 +1,25 @@
+name: Morning Schedule Notifier
+
+on:
+  schedule:
+    # Запуск каждый день в 05:00 UTC (это ровно 08:00 по Минску/Москве)
+    - cron: '0 5 * * *'
+  workflow_dispatch: # Позволяет запустить вручную для теста
+
+jobs:
+  send-notification:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.10'
+
+      - name: Run notification script
+        env:
+          BOT_TOKEN: ${{ secrets.BOT_TOKEN }}
+          MY_TELEGRAM_ID: ${{ secrets.MY_TELEGRAM_ID }}
+        run: python notifier.py
