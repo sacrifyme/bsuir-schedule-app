@@ -554,7 +554,7 @@
             cursor: pointer;
         }
 
-        .save-settings-btn {
+        .-settings-btn {
             width: 100%;
             background: var(--button-color);
             color: var(--button-text);
@@ -899,7 +899,7 @@
             }
         }
 
-        function saveCustomEvent() {
+        async function saveCustomEvent() {
             const title = document.getElementById('eventNameInput').value.trim();
             const date = document.getElementById('eventDateInput').value;
             const startTime = document.getElementById('eventStartTimeInput').value;
@@ -922,13 +922,80 @@
                 subgroup: 0
             };
 
+            // 1. Сохраняем локально в браузере (как и было)
             customEvents.push(newEvent);
             localStorage.setItem('custom_events', JSON.stringify(customEvents));
+
+            // 2. 🔥 АВТОМАТИЧЕСКАЯ ОТПРАВКА НА GITHUB ДЛЯ БОТА
+            await syncEventToGitHub(newEvent);
 
             document.getElementById('eventNameInput').value = '';
             document.getElementById('eventRoomInput').value = '';
             closeEventModal();
             renderSchedule();
+        }
+
+        async function syncEventToGitHub(eventData) {
+            // ⚠️ ВПИШИ СЮДА СВОИ ДАННЫЕ:
+            const GITHUB_USERNAME = "sacrifyme"; // например: "sacrifyme"
+            const REPO_NAME = "bsuir-schedule-app";     // например: "my-schedule-bot"
+            const TOKEN = "ghp_ТВОЙ_ТОКЕН_КЛАССИК";       // Тот самый Classic Personal Access Token, что ты создал
+            
+            const filePath = "custom_events.json";
+            const url = `https://api.github.com/repos/${GITHUB_USERNAME}/${REPO_NAME}/contents/${filePath}`;
+
+            try {
+                // Получаем актуальный файл с GitHub, чтобы узнать его SHA
+                let response = await fetch(url, {
+                    headers: {
+                        "Authorization": `Bearer ${TOKEN}`,
+                        "Accept": "application/vnd.github.v3+json"
+                    }
+                });
+
+                let fileSha = "";
+                let existingData = {};
+
+                if (response.ok) {
+                    let fileData = await response.json();
+                    fileSha = fileData.sha;
+                    let decodedContent = decodeURIComponent(escape(atob(fileData.content)));
+                    existingData = JSON.parse(decodedContent);
+                }
+
+                // Структурируем данные по датам (YYYY-MM-DD)
+                const dateKey = eventData.date;
+                if (!existingData[dateKey]) {
+                    existingData[dateKey] = [];
+                }
+                existingData[dateKey].push(eventData);
+
+                // Кодируем обратно в base64 для GitHub API
+                const updatedContentBase64 = btoa(unescape(encodeURIComponent(JSON.stringify(existingData, null, 2))));
+
+                // Отправляем PUT-запрос с обновлением файла в репозиторий
+                let updateResponse = await fetch(url, {
+                    method: "PUT",
+                    headers: {
+                        "Authorization": `Bearer ${TOKEN}`,
+                        "Content-Type": "application/json",
+                        "Accept": "application/vnd.github.v3+json"
+                    },
+                    body: JSON.stringify({
+                        message: `Auto-sync custom event via Mini App (${dateKey})`,
+                        content: updatedContentBase64,
+                        sha: fileSha
+                    })
+                });
+
+                if (updateResponse.ok) {
+                    console.log("Событие успешно улетело на GitHub!");
+                } else {
+                    console.error("Ошибка при обновлении custom_events.json на GitHub");
+                }
+            } catch (error) {
+                console.error("Ошибка сети при синхронизации:", error);
+            }
         }
 
         function deleteCustomEvent(id) {
